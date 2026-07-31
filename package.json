@@ -1,0 +1,12 @@
+{
+  "name": "ticker-tails",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test",
+    "check": "node --check src/app.js"
+  }
+}
