@@ -1,41 +1,58 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  allocations,
-  formatMoney,
+  allocationGroups,
+  avatarCatalog,
+  cashReserve,
+  energyProfile,
+  evolutionStage,
   getHolding,
+  gravityProfile,
   holdings,
-  movementClass,
-  optionExpedition,
+  performanceProfile,
+  physicsRules,
   portfolio,
-  signedPercent,
 } from '../src/data.js'
 
-test('portfolio holdings have unique ids and required game fields', () => {
+test('active avatars have unique ids and complete physics inputs', () => {
   assert.equal(new Set(holdings.map(({ id }) => id)).size, holdings.length)
   for (const holding of holdings) {
-    for (const field of ['id', 'ticker', 'name', 'value', 'weight', 'dayChange', 'mood', 'thesis', 'risk']) {
+    for (const field of ['id', 'ticker', 'avatar', 'creature', 'value', 'weight', 'growth', 'dayChange', 'stage', 'gravity', 'energy', 'performance']) {
       assert.notEqual(holding[field], undefined)
     }
+    assert.equal(holding.behaviors.length, 3)
   }
 })
 
-test('portfolio allocation is complete and matches the portfolio value', () => {
-  assert.ok(Math.abs(allocations.reduce((sum, allocation) => sum + allocation.value, 0) - 100) < Number.EPSILON * 100)
-  assert.equal(portfolio.value, 12840)
+test('portfolio values and allocations reconcile', () => {
+  const activeValue = holdings.reduce((sum, holding) => sum + holding.value, 0) + cashReserve.value
+  const activeWeight = holdings.reduce((sum, holding) => sum + holding.weight, 0) + cashReserve.weight
+  const groupWeight = allocationGroups.reduce((sum, group) => sum + group.value, 0)
+  assert.equal(activeValue, portfolio.value)
+  assert.equal(activeWeight, 100)
+  assert.equal(groupWeight, 100)
 })
 
-test('formatting helpers make movements and values readable', () => {
-  assert.equal(formatMoney(12840), '$12,840')
-  assert.equal(signedPercent(-1.2), '−1.2%')
-  assert.equal(signedPercent(2.4), '+2.4%')
-  assert.equal(movementClass(-1.2), 'down')
-  assert.equal(movementClass(2.4), 'up')
+test('evolution thresholds match the Market Biome rules', () => {
+  assert.equal(evolutionStage(4.9).key, 'basic')
+  assert.equal(evolutionStage(5).key, 'emergent')
+  assert.equal(evolutionStage(15).key, 'advanced')
+  assert.equal(evolutionStage(30).key, 'peak')
 })
 
-test('options expedition exposes the critical paper-risk terms', () => {
-  assert.equal(getHolding('nvidia').hasOption, true)
-  for (const field of ['premium', 'contractCost', 'strike', 'breakeven', 'expiration']) {
-    assert.ok(optionExpedition[field])
-  }
+test('valuation, growth, and daily movement translate into physics', () => {
+  assert.equal(gravityProfile(72).key, 'ultralight')
+  assert.equal(gravityProfile(18).key, 'heavy')
+  assert.equal(gravityProfile(null).key, 'anchored')
+  assert.equal(energyProfile(28).key, 'stardust')
+  assert.equal(energyProfile(4).key, 'bloom')
+  assert.equal(performanceProfile(4.8).key, 'surging')
+  assert.equal(performanceProfile(-1.2).key, 'negative')
+})
+
+test('the field guide includes every exported avatar family', () => {
+  assert.equal(holdings.length + avatarCatalog.length, 12)
+  assert.equal(physicsRules.length, 4)
+  assert.equal(getHolding('nvidia').avatar, 'Emerald Tech-Dragon')
+  assert.ok(avatarCatalog.some(item => item.ticker === 'JPM'))
 })

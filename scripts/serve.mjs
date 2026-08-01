@@ -21,4 +21,4 @@ export const server = createServer(async (request, response) => {
   } catch { response.writeHead(404); response.end('Not found') }
 })
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) server.listen(5173, '0.0.0.0', () => console.log('Ticker Tails ready at http://localhost:5173'))
+if (process.argv[1] === fileURLToPath(import.meta.url)) server.listen(5173, '0.0.0.0', () => console.log('Market Biome ready at http://localhost:5173'))

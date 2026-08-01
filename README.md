@@ -1,17 +1,17 @@
-# Ticker Tails
+# Market Biome
 
-Ticker Tails is a mobile-first, locally runnable prototype that turns an illustrative personal portfolio into a living homestead.
+Market Biome is a mobile-first prototype that turns an illustrative investment portfolio into a living stock-avatar ecosystem.
 
 ## What you can test
 
-- Visit four tappable portfolio companions in the homestead.
-- Read plain-language stories that separate market movement from investor action.
-- Inspect position value, weight, thesis, risk, and the companion’s understanding bond.
-- Compare a paper buy, hold, or sell in the Decision Lab.
-- Walk through a paper-only option contract with premium, expiration, breakeven, and maximum loss.
-- Review a home-fund goal, allocation, and portfolio resilience.
-- Complete stewardship quests and earn cosmetic Sun Tokens.
-- Refresh the browser without losing local quest progress.
+- Switch between profitable golden-hour weather, portfolio-loss overcast, and VIX-style wind.
+- View allocation, P/E, projected growth, or daily performance through four physics lenses.
+- Tap six active stock avatars to inspect their visual design, signature behaviors, thesis, and risk.
+- Tune allocation, P/E, growth, and daily movement in a live avatar-engine sandbox.
+- Explore all twelve exported avatar concepts in the field guide.
+- Compare the biome effect of a paper buy, hold, or sell.
+- Walk through an illustrative NVDA option contract without placing a trade.
+- Review goal progress, portfolio composition, liquidity, and concentration.
 
 All values are illustrative. The prototype has no brokerage connection and cannot place trades.
 
@@ -28,7 +28,7 @@ No dependency installation is required.
 ## Validate
 
 ```bash
-npm test
 npm run check
+npm test
 npm run build
 ```

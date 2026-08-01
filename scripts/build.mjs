@@ -10,4 +10,4 @@ await Promise.all([
   cp('src/styles.css', 'dist/src/styles.css'),
   cp('assets', 'dist/assets', { recursive: true }),
 ])
-console.log('Built Ticker Tails in dist/')
+console.log('Built Market Biome in dist/')
