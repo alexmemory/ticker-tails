@@ -7,6 +7,6 @@
     "dev": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",
     "test": "node --test",
-    "check": "node --check src/app.js"
+    "check": "node --check src/app.js && node --check src/animal-rigs.js && node --check src/playcanvas-farm.js"
   }
 }

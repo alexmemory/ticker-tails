@@ -11,32 +11,54 @@ export const portfolio = {
   },
 }
 
+const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value))
+
 export const evolutionStage = weight => {
-  if (weight < 5) return { key: 'basic', label: 'Basic', scale: 0.82 }
-  if (weight < 15) return { key: 'emergent', label: 'Emergent', scale: 0.96 }
-  if (weight < 30) return { key: 'advanced', label: 'Advanced', scale: 1.12 }
-  return { key: 'peak', label: 'Peak', scale: 1.28 }
+  if (weight < 5) return { key: 'starter', label: 'Starter', scale: 0.78 }
+  if (weight < 15) return { key: 'growing', label: 'Growing', scale: 0.9 }
+  if (weight < 30) return { key: 'thriving', label: 'Thriving', scale: 1.04 }
+  return { key: 'landmark', label: 'Landmark', scale: 1.18 }
 }
 
-export const gravityProfile = pe => {
-  if (pe == null) return { key: 'anchored', label: 'Anchored', lift: 0 }
-  if (pe >= 50) return { key: 'ultralight', label: 'Ultra-low gravity', lift: -34 }
-  if (pe >= 35) return { key: 'light', label: 'Low gravity', lift: -24 }
-  if (pe >= 25) return { key: 'balanced', label: 'Balanced gravity', lift: -11 }
-  return { key: 'heavy', label: 'High gravity', lift: 4 }
+export const animalSimulation = (weight, dayChange) => {
+  const activity = clamp(
+    18 + weight * 1.4 + Math.max(dayChange, 0) * 5 - Math.max(-dayChange, 0) * 3,
+    10,
+    100,
+  )
+
+  return {
+    stage: evolutionStage(weight),
+    activity: Math.round(activity),
+    vividness: clamp(0.68 + (dayChange + 10) / 20 * 0.52, 0.58, 1.2),
+    speed: Math.round(clamp(3100 - activity * 19, 1050, 2900)),
+    habitatScale: clamp(0.82 + weight / 45 * 0.38, 0.82, 1.2),
+    priceState: dayChange >= 1 ? 'up' : dayChange <= -1 ? 'down' : 'flat',
+    mood: dayChange >= 3 ? 'celebrating' : dayChange >= 1 ? 'bright' : dayChange <= -3 ? 'sheltering' : dayChange <= -1 ? 'quiet' : 'steady',
+  }
 }
 
-export const energyProfile = growth => {
-  if (growth >= 20) return { key: 'stardust', label: 'Stardust propulsion' }
-  if (growth >= 10) return { key: 'spark', label: 'Kinetic sparks' }
-  return { key: 'bloom', label: 'Flower trail' }
-}
+export const dragonSimulation = (allocation, priceChange) => {
+  const base = animalSimulation(allocation, priceChange)
+  let sequence = priceChange >= 5
+    ? ['flight', 'display', 'roam']
+    : priceChange >= 1
+      ? ['flight', 'roam', 'cuddle']
+      : priceChange > -2
+        ? ['roam', 'cuddle', 'idle']
+        : ['cuddle', 'idle']
 
-export const performanceProfile = dayChange => {
-  if (dayChange >= 2) return { key: 'surging', label: 'Surging', displacement: -12 }
-  if (dayChange > 0) return { key: 'positive', label: 'Buoyant', displacement: -5 }
-  if (dayChange <= -2) return { key: 'slumped', label: 'Sheltering', displacement: 15 }
-  return { key: 'negative', label: 'Grounded', displacement: 8 }
+  if (allocation < 5) {
+    sequence = priceChange >= 1 ? ['roam', 'cuddle'] : ['cuddle', 'idle']
+  } else if (allocation >= 30 && priceChange > -2 && !sequence.includes('display')) {
+    sequence = [sequence[0], 'display', ...sequence.slice(1)]
+  }
+
+  return {
+    ...base,
+    sequence,
+    chipClusters: clamp(Math.ceil(allocation / 5), 1, 8),
+  }
 }
 
 const rawHoldings = [
@@ -44,261 +66,506 @@ const rawHoldings = [
     id: 'nvidia',
     ticker: 'NVDA',
     avatar: 'Emerald Tech-Dragon',
-    shortName: 'Tech-Dragon',
-    creature: '🐉',
-    type: 'dragon',
-    sector: 'Tech & Growth',
+    shortName: 'Nori',
+    kind: 'dragon',
     value: 2311,
     weight: 18,
-    pe: 44,
-    growth: 28,
     dayChange: 4.8,
-    position: 'nvda',
-    vibe: 'Unstoppable momentum, computing power, and the AI revolution.',
-    visual: 'A sleek dragon with etched silicon-wafer scales, an internal emerald glow, and a tiny black leather jacket.',
-    behaviors: [
-      'Sleeps on a nest of glowing microchips and GPUs.',
-      'Breathes pixelated AI fire when the stock surges.',
-      'Takes a computational nap with a slow neon pulse during market lulls.',
-    ],
-    thesis: 'Demand for accelerated computing remains the central investment case.',
+    x: 82,
+    y: 39,
+    pen: { x: 1395, y: 284, width: 270, height: 175 },
+    anchor: { x: 1518, y: 386 },
+    station: { x: 1588, y: 344 },
+    stationKind: 'chip nest',
+    home: 'Compute Paddock',
+    careAction: 'Cool the chip nest',
+    need: 'Cooling check',
+    behavior: 'Flaps between the workshop and its GPU pile, then curls around the warmest chips.',
+    thesis: 'Accelerated computing demand remains the central investment case.',
     risk: 'High expectations make the position sensitive to small disappointments.',
-    hasOption: true,
+    accent: '#35e788',
   },
   {
     id: 'apple',
     ticker: 'AAPL',
-    avatar: 'Walled-Garden Swan',
-    shortName: 'Titanium Swan',
-    creature: '🦢',
-    type: 'swan',
-    sector: 'Tech & Growth',
+    avatar: 'Orchard Pig',
+    shortName: 'Pippa',
+    kind: 'pig',
+    spriteColumn: 0,
     value: 2825,
     weight: 22,
-    pe: 32,
-    growth: 10,
     dayChange: 2.4,
-    position: 'aapl',
-    vibe: 'Sleek, elite, pristine, and protective of a curated ecosystem.',
-    visual: 'An elegant futuristic swan with brushed-titanium feathers and a precise glowing force field.',
-    behaviors: [
-      'Meticulously aligns every titanium feather.',
-      'Projects a walled-garden force field around its nest.',
-      'Refuses generic treats and eats only premium organic apples.',
-    ],
+    x: 20,
+    y: 47,
+    pen: { x: 95, y: 342, width: 290, height: 175 },
+    anchor: { x: 246, y: 454 },
+    station: { x: 153, y: 414 },
+    stationKind: 'apple trough',
+    home: 'Apple Orchard Pen',
+    careAction: 'Fill the apple trough',
+    need: 'Apple feed',
+    behavior: 'Roots through the orchard pen, polishes its favorite apple, and naps by the white fence.',
     thesis: 'A durable consumer ecosystem with recurring services revenue.',
     risk: 'One company represents more than a fifth of the portfolio.',
+    accent: '#f2a18e',
   },
   {
     id: 'microsoft',
     ticker: 'MSFT',
     avatar: 'Cloud-Crafter Owl',
-    shortName: 'Cloud Owl',
-    creature: '🦉',
-    type: 'owl',
-    sector: 'Tech & Growth',
+    shortName: 'Azure',
+    kind: 'owl',
+    spriteColumn: 1,
     value: 1798,
     weight: 14,
-    pe: 36,
-    growth: 15,
     dayChange: 1.1,
-    position: 'msft',
-    vibe: 'Wise, structured, enterprise-minded, and at home in the cloud.',
-    visual: 'A spectacled owl with cirrus-cloud feathers and a utility belt filled with tiny enterprise tools.',
-    behaviors: [
-      'Organizes nearby avatars into neat color-coded rows.',
-      'Rotates its head to scan the cloud for threats.',
-      'Flies toward the user’s finger to co-pilot when tapped.',
-    ],
+    x: 50,
+    y: 20,
+    pen: { x: 738, y: 118, width: 220, height: 150 },
+    anchor: { x: 849, y: 188 },
+    station: { x: 850, y: 165 },
+    stationKind: 'loft antenna',
+    home: 'Cloud Barn Loft',
+    careAction: 'Tune the loft antenna',
+    need: 'Cloud scan',
+    behavior: 'Perches above the barn, scans the valley, and circles the silo when cloud activity rises.',
     thesis: 'Cloud infrastructure and software distribution reinforce one another.',
     risk: 'Its valuation assumes continued execution across several large businesses.',
+    accent: '#71bfea',
   },
   {
     id: 'tesla',
     ticker: 'TSLA',
-    avatar: 'Cyber-Hound',
-    shortName: 'Cyber-Hound',
-    creature: '🐕',
-    type: 'hound',
-    sector: 'Tech & Growth',
+    avatar: 'Cyber Barn Cat',
+    shortName: 'Volt',
+    kind: 'cat',
+    spriteColumn: 2,
     value: 1027,
     weight: 8,
-    pe: 72,
-    growth: 20,
     dayChange: -1.2,
-    position: 'tsla',
-    vibe: 'Fast, autonomous, highly engineered, and occasionally unpredictable.',
-    visual: 'An angular stainless-steel greyhound with red LED eyes and a charging-cable tail.',
-    behaviors: [
-      'Zips along the biome edges in autonomous mode on green days.',
-      'Plays fetch with a miniature humanoid robot.',
-      'Backs perfectly into a glowing charger to sleep.',
-    ],
+    x: 30,
+    y: 34,
+    pen: { x: 421, y: 238, width: 230, height: 145 },
+    anchor: { x: 522, y: 325 },
+    station: { x: 486, y: 298 },
+    stationKind: 'charger',
+    home: 'Solar Charging Yard',
+    careAction: 'Charge the collar',
+    need: 'Battery low',
+    behavior: 'Stalks sunbeams under the solar roof, pounces on cable shadows, and returns to its charger.',
     thesis: 'A long-duration bet on manufacturing scale and transportation technology.',
     risk: 'The story depends on execution across several uncertain businesses.',
+    accent: '#ef6c54',
   },
   {
     id: 'berkshire',
     ticker: 'BRK.B',
     avatar: 'Mindful Tortoise',
-    shortName: 'Tortoise',
-    creature: '🐢',
-    type: 'tortoise',
-    sector: 'Traditional & Value',
+    shortName: 'Berk',
+    kind: 'tortoise',
+    spriteColumn: 3,
     value: 2054,
     weight: 16,
-    pe: 24,
-    growth: 6,
     dayChange: 0.3,
-    position: 'brkb',
-    vibe: 'Unshakable patience, long-term value, and indifference to short-term noise.',
-    visual: 'An ancient tortoise whose shell holds a moving train, a brick house, and a tiny ice-cream shop.',
-    behaviors: [
-      'Moves slowly while high-growth avatars dart overhead.',
-      'Munches old-fashioned paper dividends.',
-      'Naps through market storms inside its industrial shell.',
-    ],
+    x: 67,
+    y: 41,
+    pen: { x: 1083, y: 294, width: 273, height: 172 },
+    anchor: { x: 1194, y: 399 },
+    station: { x: 1260, y: 384 },
+    stationKind: 'clover stone',
+    home: 'Stone Value Pasture',
+    careAction: 'Refresh the clover',
+    need: 'Clover check',
+    behavior: 'Takes the long route around the stone wall and rests through noisy market weather.',
     thesis: 'Diverse operating companies and patient capital allocation provide resilience.',
     risk: 'Size can limit future growth and results still depend on capital allocation.',
+    accent: '#a8c45b',
   },
   {
     id: 'bonds',
     ticker: 'BND',
     avatar: 'Anchor Elephant',
-    shortName: 'Anchor Elephant',
-    creature: '🐘',
-    type: 'elephant',
-    sector: 'Traditional & Value',
+    shortName: 'Harbor',
+    kind: 'elephant',
+    spriteColumn: 4,
     value: 1541,
     weight: 12,
-    pe: null,
-    growth: 3,
     dayChange: 0.1,
-    position: 'bnd',
-    vibe: 'Ultimate stability, immense weight, and a calm portfolio foundation.',
-    visual: 'A gentle elephant wearing a harness of government bonds and glowing with a soft aura of safety.',
-    behaviors: [
-      'Acts as a literal anchor near the bottom of the biome.',
-      'Sprays calming mist over frantic growth creatures.',
-      'Sleeps against a giant immovable block of stone.',
-    ],
+    x: 76,
+    y: 63,
+    pen: { x: 1287, y: 466, width: 325, height: 190 },
+    anchor: { x: 1480, y: 583 },
+    station: { x: 1346, y: 538 },
+    stationKind: 'water trough',
+    home: 'Anchor Stable',
+    careAction: 'Fill the water trough',
+    need: 'Fresh water',
+    behavior: 'Walks between the stable and pond, then sprays a calming mist across the lower farm.',
     thesis: 'Broad bond exposure can counterbalance equity volatility.',
     risk: 'Bond prices can fall when rates rise, and stability is not a guarantee.',
+    accent: '#8faec6',
   },
 ]
 
 export const holdings = rawHoldings.map(holding => ({
   ...holding,
+  farmId: 'alex',
+  tradable: true,
   stage: evolutionStage(holding.weight),
-  gravity: gravityProfile(holding.pe),
-  energy: energyProfile(holding.growth),
-  performance: performanceProfile(holding.dayChange),
+  simulation: animalSimulation(holding.weight, holding.dayChange),
 }))
 
-export const cashReserve = { id: 'cash', ticker: 'CASH', value: 1284, weight: 10, label: 'Liquidity pool' }
+export const cashReserve = {
+  id: 'cash',
+  ticker: 'CASH',
+  avatar: 'Treasury Clover',
+  shortName: 'Clover',
+  kind: 'crop',
+  value: 1284,
+  weight: 10,
+  dayChange: 0.1,
+  x: 48,
+  y: 76,
+  pen: { x: 351, y: 628, width: 760, height: 188 },
+  anchor: { x: 810, y: 743 },
+  station: { x: 876, y: 700 },
+  stationKind: 'irrigation pump',
+  home: 'Liquidity Field',
+  careAction: 'Water the clover rows',
+  need: 'Irrigation',
+  behavior: 'Clover rows sway gently and send up new leaves as the reserve grows.',
+  thesis: 'A liquid reserve can fund near-term needs and reduce forced selling.',
+  risk: 'Cash may lose purchasing power and can lag productive assets over time.',
+  accent: '#7ec86f',
+  farmId: 'alex',
+  tradable: true,
+  stage: evolutionStage(10),
+  simulation: animalSimulation(10, 0.1),
+}
 
-export const avatarCatalog = [
+const neighborSlots = [
   {
-    ticker: 'GOOG',
-    avatar: 'Prismatic Octopus',
-    creature: '🐙',
-    sector: 'Tech & Growth',
-    vibe: 'Inquisitive, omnipresent, and highly intelligent.',
-    visual: 'A brilliant octopus that cycles through prismatic primary colors and juggles search, video, and mobility artifacts.',
-    behaviors: ['Juggles ecosystem tools.', 'Squirts broken search links when startled.', 'Dances in tiny VR goggles on strong days.'],
+    pen: { x: 110, y: 310, width: 275, height: 175 },
+    anchor: { x: 248, y: 410 },
+    station: { x: 160, y: 370 },
   },
   {
-    ticker: 'AMZN',
-    avatar: 'Infinite Kangaroo',
-    creature: '🦘',
-    sector: 'Tech & Growth',
-    vibe: 'Boundless energy, logistics scale, and a bottomless cloud pouch.',
-    visual: 'A sturdy kangaroo in a high-tech blue harness with a glowing pouch that evolves from backpack to drone-assisted logistics hub.',
-    behaviors: ['Pulls surprising items from its pouch.', 'Leaves cardboard parcels after purchases.', 'Gains robotic arms at advanced stages.'],
+    pen: { x: 430, y: 225, width: 265, height: 170 },
+    anchor: { x: 560, y: 330 },
+    station: { x: 630, y: 282 },
   },
   {
-    ticker: 'META',
-    avatar: 'Omniscient Chameleon',
-    creature: '🦎',
-    sector: 'Tech & Growth',
-    vibe: 'Hyper-adaptable, AI-focused, and constantly observing.',
-    visual: 'A blue-purple chameleon in smart glasses whose scales reflect the day’s movement.',
-    behaviors: ['Catches data bugs.', 'Projects AI holograms.', 'Unrolls a perfectly targeted ad scroll when tapped.'],
+    pen: { x: 760, y: 120, width: 250, height: 170 },
+    anchor: { x: 880, y: 225 },
+    station: { x: 940, y: 170 },
   },
   {
-    ticker: 'NFLX',
-    avatar: 'Binge-Watching Red Panda',
-    creature: '🐼',
-    sector: 'Tech & Growth',
-    vibe: 'Cozy, captivating, and built for mass entertainment.',
-    visual: 'A bright-red panda with popcorn, a remote, and 3D glasses perched on its head.',
-    behaviors: ['Builds a pillow fort.', 'Rolls out a red carpet on surges.', 'Falls asleep beneath an “Are you still watching?” bubble.'],
+    pen: { x: 1070, y: 280, width: 275, height: 180 },
+    anchor: { x: 1205, y: 390 },
+    station: { x: 1280, y: 335 },
   },
   {
-    ticker: 'JPM',
-    avatar: 'Fortress Griffin',
-    creature: '🦅',
-    sector: 'Traditional & Value',
-    vibe: 'Legacy, structural importance, and fortress-like resilience.',
-    visual: 'A marble-and-gold griffin resting on an immense steel vault door.',
-    behaviors: ['Protects its nest with stone wings.', 'Flips a pristine gold coin.', 'Braces rather than panics during volatile weather.'],
-  },
-  {
-    ticker: 'V',
-    avatar: 'Network Weaver-Bird',
-    creature: '🐦',
-    sector: 'Traditional & Value',
-    vibe: 'Constant motion, global reach, and invisible payment infrastructure.',
-    visual: 'A nimble bird woven from gold and navy fiber-optic threads.',
-    behaviors: ['Connects avatars with glowing payment webs.', 'Drops receipts that dissolve into sparkles.', 'Chirps like a contactless terminal.'],
+    pen: { x: 1370, y: 400, width: 300, height: 195 },
+    anchor: { x: 1510, y: 520 },
+    station: { x: 1435, y: 470 },
   },
 ]
 
-export const physicsRules = [
+const neighborSpecs = [
   {
-    id: 'allocation',
-    icon: '◌',
-    metric: 'Allocation size',
-    title: 'Habitat & evolution',
-    rule: 'Portfolio weight controls habitat footprint and evolutionary stage.',
-    range: '0–5% Basic · 5–15% Emergent · 15–30% Advanced · 30%+ Peak',
+    id: 'alphabet',
+    farmId: 'maya',
+    ticker: 'GOOGL',
+    avatar: 'Search & Shepherd Collie',
+    shortName: 'Query',
+    kind: 'dog',
+    value: 2460,
+    weight: 24,
+    dayChange: 1.7,
+    home: 'Search Meadow',
+    careAction: 'Hide a search toy',
+    need: 'Discovery exercise',
+    stationKind: 'search course',
+    behavior: 'Tracks query trails through the meadow, pauses at branching paths, and returns with the most useful result.',
+    thesis: 'Search, advertising, cloud infrastructure, and AI research form a broad technology platform.',
+    risk: 'Regulatory pressure and changing discovery behavior could weaken established distribution advantages.',
+    accent: '#4d8df7',
   },
   {
-    id: 'gravity',
-    icon: '↓',
-    metric: 'P/E ratio',
-    title: 'Gravity & density',
-    rule: 'Higher valuations create low gravity; value-oriented avatars feel dense and grounded.',
-    range: 'High P/E floats · Low P/E leaves deep footprints',
+    id: 'amazon',
+    farmId: 'maya',
+    ticker: 'AMZN',
+    avatar: 'Delivery Draft Horse',
+    shortName: 'Prime',
+    kind: 'horse',
+    value: 2200,
+    weight: 21,
+    dayChange: 2.1,
+    home: 'Commerce Stable',
+    careAction: 'Load the delivery cart',
+    need: 'Route preparation',
+    stationKind: 'delivery depot',
+    behavior: 'Pulls a parcel cart between the warehouse and cloud stable, changing pace as orders accumulate.',
+    thesis: 'Commerce scale, logistics infrastructure, and cloud computing reinforce a large operating ecosystem.',
+    risk: 'Large investment requirements and retail margins can amplify execution risk.',
+    accent: '#f0a33b',
   },
   {
-    id: 'energy',
-    icon: '✦',
-    metric: 'Projected growth',
-    title: 'Kinetic energy',
-    rule: 'Growth estimates control motion intensity and the trail an avatar leaves behind.',
-    range: 'High growth: stardust · Steady growth: flowers',
+    id: 'meta',
+    farmId: 'maya',
+    ticker: 'META',
+    avatar: 'Social Signal Peacock',
+    shortName: 'Reel',
+    kind: 'peacock',
+    value: 1850,
+    weight: 18,
+    dayChange: -0.6,
+    home: 'Connection Courtyard',
+    careAction: 'Polish the signal mirrors',
+    need: 'Community check',
+    stationKind: 'signal mirror',
+    behavior: 'Fans its display when engagement rises and patrols the courtyard between community gathering points.',
+    thesis: 'Large social networks and advertising tools provide scale for new AI-enabled products.',
+    risk: 'Attention shifts, regulation, and heavy platform investment can change returns quickly.',
+    accent: '#6b76e8',
   },
   {
-    id: 'performance',
-    icon: '↗',
-    metric: 'Daily performance',
-    title: 'Daily physics',
-    rule: 'Positive movement lifts and energizes; negative movement grounds and slows.',
-    range: 'Green: buoyant · Red: sheltered near the ground',
+    id: 'broadcom',
+    farmId: 'maya',
+    ticker: 'AVGO',
+    avatar: 'Infrastructure Beaver',
+    shortName: 'Switch',
+    kind: 'beaver',
+    value: 1640,
+    weight: 16,
+    dayChange: 3.2,
+    home: 'Network Millpond',
+    careAction: 'Reinforce the data dam',
+    need: 'Network inspection',
+    stationKind: 'data dam',
+    behavior: 'Carries polished silicon branches to a small dam and keeps the farm’s information channels flowing.',
+    thesis: 'Semiconductor and infrastructure software exposure participates in networking and AI build-outs.',
+    risk: 'Customer concentration, integration, and semiconductor cycles can create uneven results.',
+    accent: '#d56f55',
   },
+  {
+    id: 'salesforce',
+    farmId: 'maya',
+    ticker: 'CRM',
+    avatar: 'Cloud Cotton',
+    shortName: 'Nimbus',
+    kind: 'crop',
+    cropType: 'cotton',
+    value: 1230,
+    weight: 12,
+    dayChange: 0.8,
+    home: 'Customer Cloud Field',
+    careAction: 'Irrigate the cloud rows',
+    need: 'Customer tending',
+    stationKind: 'cloud irrigation',
+    behavior: 'Soft cotton bolls brighten as recurring customer relationships deepen across the field.',
+    thesis: 'A large installed base supports recurring enterprise software revenue and platform expansion.',
+    risk: 'Competition and slower enterprise spending can pressure growth.',
+    accent: '#64a7df',
+  },
+  {
+    id: 'amd',
+    farmId: 'jordan',
+    ticker: 'AMD',
+    avatar: 'Ruby Compute Fox',
+    shortName: 'Ryzen',
+    kind: 'fox',
+    value: 2380,
+    weight: 23,
+    dayChange: 3.6,
+    home: 'Ruby Processor Run',
+    careAction: 'Cool the processor den',
+    need: 'Thermal check',
+    stationKind: 'processor den',
+    behavior: 'Darts between CPU stones and the accelerator den, then listens for changes in the compute trail.',
+    thesis: 'Competitive CPUs and accelerators offer exposure to data-center and client computing demand.',
+    risk: 'Product cycles and intense competition can produce sharp changes in market share.',
+    accent: '#df4c45',
+  },
+  {
+    id: 'oracle',
+    farmId: 'jordan',
+    ticker: 'ORCL',
+    avatar: 'Database Ox',
+    shortName: 'Ledger',
+    kind: 'ox',
+    value: 2050,
+    weight: 20,
+    dayChange: 1.2,
+    home: 'Database Terrace',
+    careAction: 'Turn the record wheel',
+    need: 'Archive rotation',
+    stationKind: 'record wheel',
+    behavior: 'Moves steadily around a stone data wheel and stores each completed pass in the archive barn.',
+    thesis: 'Database software and cloud infrastructure combine recurring relationships with infrastructure growth.',
+    risk: 'Cloud competition and large capital commitments can affect the pace of returns.',
+    accent: '#d96852',
+  },
+  {
+    id: 'netflix',
+    farmId: 'jordan',
+    ticker: 'NFLX',
+    avatar: 'Cinema Flamingo',
+    shortName: 'Flick',
+    kind: 'flamingo',
+    value: 1710,
+    weight: 17,
+    dayChange: 2.4,
+    home: 'Streaming Lagoon',
+    careAction: 'Refresh the story pool',
+    need: 'Programming cycle',
+    stationKind: 'story pool',
+    behavior: 'Wades through the lagoon’s story reels and performs a bright dance when viewing demand rises.',
+    thesis: 'Global streaming scale supports content investment, advertising, and membership monetization.',
+    risk: 'Content costs, competition, and shifting consumer preferences remain material.',
+    accent: '#eb5265',
+  },
+  {
+    id: 'palantir',
+    farmId: 'jordan',
+    ticker: 'PLTR',
+    avatar: 'Sentinel Analytics Hawk',
+    shortName: 'AIP',
+    kind: 'hawk',
+    value: 1420,
+    weight: 14,
+    dayChange: 4.1,
+    home: 'Analytics Watchtower',
+    careAction: 'Tune the watchtower',
+    need: 'Signal analysis',
+    stationKind: 'watchtower',
+    behavior: 'Circles above the watchtower, dives toward new signals, and returns to assemble a clearer operational picture.',
+    thesis: 'Data integration and AI deployment tools address demanding government and commercial workflows.',
+    risk: 'A high valuation and concentrated contracts can magnify disappointments.',
+    accent: '#8d93a2',
+  },
+  {
+    id: 'qualcomm',
+    farmId: 'jordan',
+    ticker: 'QCOM',
+    avatar: 'Signal Corn',
+    shortName: 'Snap',
+    kind: 'crop',
+    cropType: 'corn',
+    value: 980,
+    weight: 10,
+    dayChange: -0.3,
+    home: 'Wireless Cornfield',
+    careAction: 'Tune the irrigation mast',
+    need: 'Wireless coverage',
+    stationKind: 'signal mast',
+    behavior: 'Rows align toward the strongest signal mast and ripple as wireless demand crosses the field.',
+    thesis: 'Wireless intellectual property and device platforms participate in connectivity across several markets.',
+    risk: 'Handset cycles, customer concentration, and licensing disputes can affect results.',
+    accent: '#d9b84a',
+  },
+]
+
+export const neighborHoldings = neighborSpecs.map((resident, index) => {
+  const slot = neighborSlots[index % neighborSlots.length]
+  return {
+    ...resident,
+    ...slot,
+    x: slot.anchor.x / 1774 * 100,
+    y: slot.anchor.y / 887 * 100,
+    tradable: false,
+    stage: evolutionStage(resident.weight),
+    simulation: animalSimulation(resident.weight, resident.dayChange),
+  }
+})
+
+export const farmResidents = [...holdings, cashReserve, ...neighborHoldings]
+
+export const neighborFarms = [
+  { id: 'maya', owner: 'Maya', name: 'Innovation Homestead', centerX: -320, centerZ: -4 },
+  { id: 'jordan', owner: 'Jordan', name: 'Growth Acres', centerX: 320, centerZ: -4 },
+  { id: 'alex', owner: 'Alex', name: 'Ticker Tails Farm', centerX: 0, centerZ: -10 },
 ]
 
 export const weatherModes = [
-  { id: 'profit', label: 'Golden hour', icon: '☀', note: 'Profitable ecosystem' },
-  { id: 'loss', label: 'Overcast', icon: '☂', note: 'Portfolio losses' },
-  { id: 'volatility', label: 'VIX wind', icon: '≋', note: 'High volatility' },
+  { id: 'sunny', label: 'Market sun', icon: '☀', note: 'Portfolio up' },
+  { id: 'overcast', label: 'Soft pullback', icon: '☁', note: 'Portfolio cooling' },
+  { id: 'windy', label: 'Volatility wind', icon: '≋', note: 'Prices moving' },
 ]
 
+export const deriveWeather = factors => {
+  const rates = clamp(Number(factors.rates), 0, 100)
+  const inflation = clamp(Number(factors.inflation), 0, 100)
+  const geopolitics = clamp(Number(factors.geopolitics), 0, 100)
+  const sentiment = clamp(Number(factors.sentiment), 0, 100)
+  const stress = Math.round(rates * 0.24 + inflation * 0.24 + geopolitics * 0.3 + (100 - sentiment) * 0.22)
+
+  let label = 'Balanced growing weather'
+  let icon = '☀'
+  if (geopolitics >= 68) {
+    label = 'Geopolitical storm front'
+    icon = '⛈'
+  } else if (inflation >= 68) {
+    label = 'Inflation heat wave'
+    icon = '♨'
+  } else if (rates >= 68) {
+    label = 'High-rate headwind'
+    icon = '≋'
+  } else if (sentiment <= 32) {
+    label = 'Sentiment fog'
+    icon = '☁'
+  } else if (sentiment >= 72 && stress < 45) {
+    label = 'Risk-on sunshine'
+    icon = '☀'
+  }
+
+  return {
+    rates,
+    inflation,
+    geopolitics,
+    sentiment,
+    stress,
+    label,
+    icon,
+    rain: geopolitics >= 55 || sentiment <= 25,
+    lightning: geopolitics >= 74,
+    wind: Math.round(clamp(rates * 0.55 + inflation * 0.25 + geopolitics * 0.2, 0, 100)),
+    warmth: inflation,
+    brightness: clamp(1.08 - stress / 190, 0.62, 1.05),
+    animalPace: clamp(0.72 + sentiment / 170 - stress / 320, 0.55, 1.22),
+  }
+}
+
+export const applySimulatedTrade = (positions, id, side, requestedAmount) => {
+  const amount = Math.max(0, Number(requestedAmount) || 0)
+  const next = { ...positions }
+  if (!Object.hasOwn(next, id) || id === 'cash') {
+    return { positions: next, executed: 0, error: 'Choose an invested holding.' }
+  }
+
+  if (side === 'buy') {
+    const executed = Math.min(amount, Math.max(0, next.cash || 0))
+    if (!executed) return { positions: next, executed: 0, error: 'Not enough simulated cash.' }
+    next.cash -= executed
+    next[id] += executed
+    return { positions: next, executed, error: null }
+  }
+
+  if (side === 'sell') {
+    const executed = Math.min(amount, Math.max(0, next[id] || 0))
+    if (!executed) return { positions: next, executed: 0, error: 'There is nothing left to sell.' }
+    next[id] -= executed
+    next.cash = (next.cash || 0) + executed
+    return { positions: next, executed, error: null }
+  }
+
+  return { positions: next, executed: 0, error: 'Unknown simulated trade.' }
+}
+
 export const allocationGroups = [
-  { label: 'Tech & Growth', value: 62, tone: 'growth' },
-  { label: 'Traditional & Value', value: 28, tone: 'value' },
-  { label: 'Cash reserve', value: 10, tone: 'cash' },
+  { label: 'Tech & Growth', value: 62 },
+  { label: 'Traditional & Value', value: 28 },
+  { label: 'Cash reserve', value: 10 },
 ]
 
 export const optionExpedition = {
@@ -320,4 +587,4 @@ export const formatMoney = (value, digits = 0) =>
   }).format(value)
 
 export const signedPercent = value => `${value >= 0 ? '+' : '−'}${Math.abs(value).toFixed(1)}%`
-export const getHolding = id => holdings.find(holding => holding.id === id)
+export const getHolding = id => farmResidents.find(holding => holding.id === id)
