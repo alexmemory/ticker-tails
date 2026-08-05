@@ -8,6 +8,7 @@ import {
   portfolio,
   signedPercent,
 } from './data.js'
+import { playWinnerChime } from './audio.js'
 import { PlayCanvasFarm } from './playcanvas-farm.js'
 
 const root = document.querySelector('#root')
@@ -28,6 +29,7 @@ const defaultProgress = {
   weather: { rates: 46, inflation: 39, geopolitics: 28, sentiment: 71 },
   tended: {},
   coins: 420,
+  soundEnabled: true,
   cosmetics: {},
   transactions: [],
 }
@@ -89,6 +91,7 @@ function shellMarkup() {
         <b>${signedPercent(portfolio.dayChange)}</b>
       </div>
       <nav class="header-actions" aria-label="Farm systems">
+        <button data-action="toggle-sound" class="sound-button" aria-label="Turn celebration sound off" aria-pressed="true"><i id="sound-icon">♪</i></button>
         <button data-action="open-weather" class="climate-button"><i id="weather-icon">☀</i><span><strong>Market weather</strong><small id="weather-label">Balanced growing weather</small></span></button>
         <button data-action="open-shop" class="shop-button"><i>◇</i><span><strong>Treats &amp; swag</strong><small><b id="coin-balance">${progress.coins}</b> virtual acorns</small></span></button>
       </nav>
@@ -122,7 +125,7 @@ function shellMarkup() {
         <button data-action="zoom-out" aria-label="Zoom out">−</button>
       </div>
 
-      <div class="engine-badge"><i></i><span><strong>PLAYCANVAS + AMMO PHYSICS</strong><small>High-density creatures · physical 3D farm & nameplates</small></span></div>
+      <div class="engine-badge"><i></i><span><strong>PLAYCANVAS + AMMO PHYSICS</strong><small>Texture-mapped animals · illustrated social habitats</small></span></div>
       <div id="holding-drawer" class="holding-drawer" aria-live="polite"></div>
       <div id="weather-panel" class="system-panel"></div>
       <div id="shop-panel" class="system-panel"></div>
@@ -289,6 +292,10 @@ function updateHud() {
   const weather = deriveWeather(progress.weather)
   document.querySelector('#portfolio-value').textContent = formatMoney(totalValue())
   document.querySelector('#coin-balance').textContent = progress.coins
+  document.querySelector('#sound-icon').textContent = progress.soundEnabled ? '♪' : '×'
+  const soundButton = document.querySelector('[data-action="toggle-sound"]')
+  soundButton?.setAttribute('aria-label', progress.soundEnabled ? 'Turn celebration sound off' : 'Turn celebration sound on')
+  soundButton?.setAttribute('aria-pressed', String(progress.soundEnabled))
   document.querySelector('#weather-icon').textContent = weather.icon
   document.querySelector('#weather-label').textContent = weather.label
   document.querySelector('#climate-pill-icon').textContent = weather.icon
@@ -338,7 +345,12 @@ function executeTrade(id, side) {
   renderDrawer()
   farmScene?.updateInvestment(id)
   farmScene?.updateInvestment('cash')
-  farmScene?.sendResidentToStation(id, side === 'buy' ? 'feed' : 'sell')
+  if (side === 'buy') {
+    farmScene?.celebrateResident(id, 'feed')
+    playWinnerChime(progress.soundEnabled)
+  } else {
+    farmScene?.sendResidentToStation(id, 'sell')
+  }
 
   const resident = getHolding(id)
   showToast(side === 'buy'
@@ -416,9 +428,15 @@ root.addEventListener('click', event => {
     saveProgress()
     updateHud()
     renderDrawer()
-    farmScene?.sendResidentToStation(resident.id, 'environment')
+    farmScene?.celebrateResident(resident.id, 'environment')
+    playWinnerChime(progress.soundEnabled)
     showToast(`${resident.careAction} complete — no simulated trade made.`)
     haptic(22)
+  } else if (action === 'toggle-sound') {
+    progress.soundEnabled = !progress.soundEnabled
+    saveProgress()
+    updateHud()
+    if (progress.soundEnabled) playWinnerChime(true)
   } else if (action === 'open-weather') {
     activePanel = 'weather'
     renderPanel()

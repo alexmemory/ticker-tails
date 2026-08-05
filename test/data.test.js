@@ -75,7 +75,7 @@ test('market movement changes activity, vividness, speed, and mood', () => {
 test('farm species live in appropriate, distinct locations', () => {
   assert.match(getHolding('apple').home, /Orchard Pen/)
   assert.equal(getHolding('apple').kind, 'pig')
-  assert.match(getHolding('microsoft').home, /Barn Loft/)
+  assert.match(getHolding('microsoft').home, /Library Loft/)
   assert.equal(getHolding('tesla').kind, 'cat')
   assert.match(getHolding('bonds').home, /Stable/)
   assert.equal(cashReserve.kind, 'crop')
@@ -92,6 +92,28 @@ test('three full farm districts have distinct technology residents', () => {
   assert.deepEqual(new Set(byFarm.jordan.map(resident => resident.ticker)), new Set(['AMD', 'ORCL', 'NFLX', 'PLTR', 'QCOM']))
   assert.equal(byFarm.maya.every(resident => resident.tradable === false), true)
   assert.equal(byFarm.jordan.every(resident => resident.tradable === false), true)
+})
+
+test('every animal habitat directly borders several animal neighbors', () => {
+  const animals = farmResidents.filter(resident => resident.kind !== 'crop')
+  const sharesBorder = (a, b) => {
+    if (a.farmId !== b.farmId) return false
+    const aRight = a.pen.x + a.pen.width
+    const bRight = b.pen.x + b.pen.width
+    const aFar = a.pen.y + a.pen.height
+    const bFar = b.pen.y + b.pen.height
+    const verticalOverlap = Math.min(aFar, bFar) - Math.max(a.pen.y, b.pen.y)
+    const horizontalOverlap = Math.min(aRight, bRight) - Math.max(a.pen.x, b.pen.x)
+    return (
+      ((aRight === b.pen.x || bRight === a.pen.x) && verticalOverlap > 60)
+      || ((aFar === b.pen.y || bFar === a.pen.y) && horizontalOverlap > 60)
+    )
+  }
+
+  for (const animal of animals) {
+    const neighbors = animals.filter(candidate => candidate !== animal && sharesBorder(animal, candidate))
+    assert.ok(neighbors.length >= 2, `${animal.ticker} should border at least two animal habitats`)
+  }
 })
 
 test('the NVIDIA dragon keeps its richer behavior sequence', () => {

@@ -96,6 +96,18 @@ summary:focus-visible {
   align-items: center;
 }
 
+.header-actions .sound-button {
+  min-width: 44px;
+  justify-content: center;
+  padding: 7px;
+}
+
+.header-actions .sound-button > i {
+  color: #073f55;
+  background: linear-gradient(135deg, #62efff, #50c4ff);
+  box-shadow: 0 5px 14px rgba(49, 201, 242, .3);
+}
+
 .brand-lockup {
   gap: 11px;
 }
@@ -1345,6 +1357,119 @@ summary:focus-visible {
 .toast.show {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+/* Saturated complementary color system: farm green, sky cyan, harvest gold,
+   coral red, and playful violet. */
+.engine-app {
+  background: #7be2c4;
+}
+
+.game-header {
+  background:
+    radial-gradient(circle at 18% -30%, rgba(78, 238, 194, .3), transparent 38%),
+    linear-gradient(110deg, #083f3b, #07574e 56%, #164564);
+  box-shadow: 0 6px 24px rgba(5, 51, 54, .32);
+}
+
+.brand-mark {
+  border-color: rgba(255, 255, 255, .42);
+  background: linear-gradient(145deg, #9be84d, #16b77b);
+  box-shadow: inset 0 2px rgba(255, 255, 255, .38), 0 8px 18px rgba(0, 0, 0, .2);
+}
+
+.brand-mark i {
+  background: #fff35c;
+}
+
+.portfolio-pulse {
+  border-color: rgba(112, 241, 212, .32);
+  background: linear-gradient(135deg, rgba(23, 139, 117, .34), rgba(55, 102, 169, .25));
+}
+
+.portfolio-pulse > b {
+  color: #eaff8a;
+  background: rgba(101, 239, 139, .2);
+}
+
+.game-stage {
+  background: #71d9c1;
+}
+
+.farm-nav,
+.climate-pill,
+.camera-tools {
+  border-color: rgba(20, 117, 99, .22);
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 10px 26px rgba(32, 68, 91, .2);
+}
+
+.farm-nav button.active {
+  background: linear-gradient(135deg, #06a977, #168dba);
+  box-shadow: 0 5px 13px rgba(10, 147, 131, .26);
+}
+
+.climate-pill > i,
+.quest-icon {
+  color: #654000;
+  background: linear-gradient(135deg, #ffe45f, #ffbe3f);
+  box-shadow: 0 5px 12px rgba(244, 167, 27, .24);
+}
+
+.climate-pill > b {
+  background: linear-gradient(135deg, #14a875, #6575dc);
+}
+
+.tending-card {
+  border-color: rgba(30, 140, 101, .22);
+  background: rgba(255, 253, 235, .97);
+  box-shadow: 0 14px 32px rgba(32, 82, 68, .2);
+}
+
+.tending-card > i {
+  background: #daf3d1;
+}
+
+.tending-card > i b {
+  background: linear-gradient(90deg, #45d768, #b8e84b, #ffd94f);
+}
+
+.camera-tools button {
+  color: #08765d;
+}
+
+.engine-badge > i {
+  border-color: rgba(30, 226, 147, .28);
+  background: #27db86;
+}
+
+.holding-drawer,
+.system-panel {
+  border-color: rgba(30, 139, 113, .24);
+  background:
+    radial-gradient(circle at 100% 0, rgba(111, 220, 255, .18), transparent 33%),
+    rgba(255, 254, 246, .98);
+  box-shadow: 0 26px 65px rgba(19, 61, 72, .32);
+}
+
+.feed-button {
+  background: linear-gradient(135deg, #15c76f, #0299a8);
+  box-shadow: 0 7px 18px rgba(8, 160, 121, .24);
+}
+
+.sell-button {
+  background: linear-gradient(135deg, #ff795e, #dc4769);
+}
+
+.weather-forecast,
+.shop-wallet {
+  background: linear-gradient(135deg, #078a79, #4875d8 75%, #8659d9);
+}
+
+.toast {
+  border-color: rgba(255, 255, 255, .26);
+  background: linear-gradient(135deg, rgba(4, 103, 87, .97), rgba(80, 69, 179, .97));
+  box-shadow: 0 12px 32px rgba(34, 35, 92, .3);
 }
 
 @keyframes live-pulse {

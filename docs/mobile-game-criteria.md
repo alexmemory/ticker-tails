@@ -31,22 +31,28 @@ This checklist translates common successful farm-simulation patterns into requir
 - **Baseline:** Interactive elements use button geometry, labels, hover/focus states, press states, disabled states, and action-oriented text.
 - **Baseline:** Tap targets are at least 44 CSS pixels for primary game controls; dense world targets have a larger invisible hit radius and clustering fallback.
 - **Baseline:** Every trade, care action, farm jump, cluster expansion, and resident selection produces immediate visible feedback; supported devices also receive short haptics.
+- **Baseline:** Positive care and buy actions synchronize a character-specific happy dance, a short colorful 3D crystal-and-spark burst, and a quick winner chime within the initiating tap.
 - **Baseline:** Destructive-looking actions such as selling require confirmation and explicitly state that they are simulated.
-- **Production:** Add spatial sound, distinct haptic patterns, cancelable long actions, and latency-safe optimistic feedback.
+- **Production:** Add positional ambience, distinct haptic patterns, cancelable long actions, and latency-safe optimistic feedback.
 
 ## 5. Legibility and accessibility
 
 - **Baseline:** Text is high-contrast, meaningful state is not communicated by color alone, controls have accessible names, keyboard focus is visible, and safe-area insets are respected.
 - **Baseline:** The layout adapts to mobile widths and maintains large primary controls.
 - **Baseline:** Reduced-motion preferences suppress nonessential interface animation.
+- **Baseline:** Reward audio has a persistent, clearly labeled mute control and never blocks interaction.
 - **Production:** Provide full screen-reader navigation to every resident and action, scalable text presets, color-vision-safe palettes, captions for all audio, remappable controls, and independent motion/effects sliders.
 
 ## 6. World credibility and visual appeal
 
-- **Baseline:** Animals use articulated high-density 3D rigs with species-specific anatomy, proportions, gait, wings, tails, ears, trunks, necks, horns, and environmental objectives.
-- **Baseline:** Crops have distinct geometry: clover, cotton, and corn are no longer reskins of one plant.
+- **Baseline:** Animals use articulated high-density 3D rigs with a cohesive charming style: three-quarter front presentation, large expressive faces, blinking eyes and catchlights, friendly mouths, connected rounded limbs, readable silhouettes, and gentle squash-and-bounce motion.
+- **Baseline:** The world uses bright complementary colors and high-value contrast so residents, actions, paths, fields, water, and buildings read as lively and rewarding instead of muddy or muted.
+- **Baseline:** Species remain instantly identifiable through exaggerated anatomy, proportions, gait, wings, tails, ears, trunks, necks, horns, manes, muzzles, and environmental objectives.
+- **Baseline:** Clover, cotton, and corn have distinct plant geometry plus friendly animated 3D crop mascots rather than functioning as anonymous field decoration.
 - **Baseline:** Buildings, fences, paths, water, bridges, trees, fields, objectives, and obstructions are real scene geometry with lighting, shadows, and physical collision where appropriate.
 - **Baseline:** Each farm has a coherent visual identity: Alex’s classic mixed farm, Maya’s glass-and-solar innovation homestead, and Jordan’s processor-and-analytics growth farm.
+- **Baseline:** Authored storybook terrain and per-habitat illustration maps add readable near-camera detail without requiring every environmental mark to be separate geometry.
+- **Baseline:** Fur, feathers, scales, shells, and skin use repeatable diffuse texture maps, while additional anatomy—primary feathers, talons, claws, joints, wing fingers, shell rims, wrinkles, nostrils, and facial markings—keeps species recognizable.
 - **Production:** Replace procedural primitives with authored, optimized, LOD-equipped models; add terrain elevation, inverse-kinematics foot placement, ambient wildlife, particles, and baked lighting.
 
 ## 7. Performance and technical resilience
@@ -60,6 +66,8 @@ This checklist translates common successful farm-simulation patterns into requir
 
 - **Baseline:** Daily care progress, resident growth by allocation, weather response, tricks, treats, and cosmetics provide short- and medium-term feedback.
 - **Baseline:** Farms and residents express investment categories spatially, letting players build memory through place and behavior.
+- **Baseline:** Every animal habitat shares boundaries with several neighboring animal habitats; autonomous residents periodically meet at those borders for friendly or mildly competitive social gestures.
+- **Baseline:** Species-specific routines connect residents to authored locations, including the owl’s launch-and-return loop from the Cloud Library reading loft.
 - **Production:** Add goals, unlockable land, habitat upgrades, collections, achievements, rotating events, streak forgiveness, and meaningful non-purchase rewards.
 
 ## 9. Economy, trust, and investment safety

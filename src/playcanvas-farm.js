@@ -92,9 +92,13 @@ export class PlayCanvasFarm {
 
       this.createCamera()
       this.createLighting()
+      this.illustratedGroundSource = await this.loadImage(
+        new URL('../assets/textures/storybook-meadow.png', import.meta.url).href,
+      ).catch(() => null)
       this.createTerrain()
       this.createFarmStructure()
       this.createResidents()
+      this.createNeighborNetwork()
       this.createLabelClusterSystem()
       this.createWeatherSystem()
 
@@ -127,6 +131,16 @@ export class PlayCanvasFarm {
     texture.setSource(source)
     this.textures.add(texture)
     return texture
+  }
+
+  loadImage(source) {
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+      image.decoding = 'async'
+      image.onload = () => resolve(image)
+      image.onerror = () => reject(new Error(`Unable to load illustrated texture: ${source}`))
+      image.src = source
+    })
   }
 
   createMaterial = (name, hex, {
@@ -237,12 +251,15 @@ export class PlayCanvasFarm {
   }
 
   createTerrain() {
-    const grassTexture = this.textureFromSource(this.drawGrassTexture(), false)
+    const grassTexture = this.textureFromSource(
+      this.illustratedGroundSource || this.drawGrassTexture(),
+      false,
+    )
     grassTexture.addressU = pc.ADDRESS_REPEAT
     grassTexture.addressV = pc.ADDRESS_REPEAT
-    const valleyMaterial = this.createTextureMaterial('Procedural explorable valley', grassTexture, { emissive: .012 })
-    valleyMaterial.diffuseMapTiling.set(380, 260)
-    valleyMaterial.emissiveMapTiling.set(380, 260)
+    const valleyMaterial = this.createTextureMaterial('Illustrated explorable meadow valley', grassTexture, { emissive: .012 })
+    valleyMaterial.diffuseMapTiling.set(190, 130)
+    valleyMaterial.emissiveMapTiling.set(190, 130)
     valleyMaterial.update()
     this.terrain = this.addPrimitive(this.app.root, 'ProceduralPhysicalValley', 'plane', valleyMaterial, {
       position: [0, 0, 0],
@@ -266,30 +283,30 @@ export class PlayCanvasFarm {
   }
 
   createFarmStructure() {
-    this.woodMaterial = this.createMaterial('Weathered cedar', '#6c472c', { gloss: .22 })
-    this.woodLightMaterial = this.createMaterial('Sunlit cedar', '#a87843', { gloss: .2 })
-    this.woodDarkMaterial = this.createMaterial('Deep stained timber', '#3f2d21', { gloss: .18 })
-    this.stoneMaterial = this.createMaterial('Field stone', '#768078', { gloss: .18 })
-    this.stoneLightMaterial = this.createMaterial('Field stone highlight', '#aab0a2', { gloss: .16 })
-    this.soilMaterial = this.createMaterial('Turned paddock soil', '#725132', { gloss: .08 })
-    this.pathMaterial = this.createMaterial('Compacted farm path', '#b99d70', { gloss: .07 })
-    this.redBarnMaterial = this.createMaterial('Barn red', '#a84e3c', { gloss: .18 })
-    this.creamMaterial = this.createMaterial('Farmhouse cream', '#e9dfbd', { gloss: .2 })
-    this.roofMaterial = this.createMaterial('Standing seam roof', '#344f4b', { gloss: .48, metalness: .22 })
-    this.techMaterial = this.createMaterial('Compute workshop metal', '#354b4a', { gloss: .58, metalness: .5 })
-    this.solarMaterial = this.createMaterial('Solar glass', '#183b56', {
+    this.woodMaterial = this.createMaterial('Weathered cedar', '#9f5728', { gloss: .26 })
+    this.woodLightMaterial = this.createMaterial('Sunlit cedar', '#df8a3e', { gloss: .25 })
+    this.woodDarkMaterial = this.createMaterial('Deep stained timber', '#552a21', { gloss: .2 })
+    this.stoneMaterial = this.createMaterial('Field stone', '#739eb2', { gloss: .22 })
+    this.stoneLightMaterial = this.createMaterial('Field stone highlight', '#d5e8d8', { gloss: .2 })
+    this.soilMaterial = this.createMaterial('Turned paddock soil', '#9d5932', { gloss: .1 })
+    this.pathMaterial = this.createMaterial('Compacted farm path', '#e2aa5b', { gloss: .09 })
+    this.redBarnMaterial = this.createMaterial('Barn red', '#e5553f', { gloss: .25 })
+    this.creamMaterial = this.createMaterial('Farmhouse cream', '#fff0b8', { gloss: .25 })
+    this.roofMaterial = this.createMaterial('Standing seam roof', '#176c7d', { gloss: .55, metalness: .22 })
+    this.techMaterial = this.createMaterial('Compute workshop metal', '#3d5791', { gloss: .62, metalness: .46 })
+    this.solarMaterial = this.createMaterial('Solar glass', '#1767b2', {
       gloss: .9,
       metalness: .52,
-      emissive: '#05111a',
+      emissive: '#031e3c',
     })
-    this.cropMaterial = this.createMaterial('Field crops', '#87b95d', { gloss: .18, emissive: '#061404' })
-    this.treeTrunkMaterial = this.createMaterial('Tree trunks', '#67503a', { gloss: .12 })
-    this.treeCanopyMaterial = this.createMaterial('Tree canopy', '#477b49', { gloss: .14 })
-    this.farHillMaterial = this.createMaterial('Distant wooded ridge', '#58784d', { gloss: .05 })
-    this.waterMaterial = this.createMaterial('Trough water', '#4b9db3', {
+    this.cropMaterial = this.createMaterial('Field crops', '#a7df4a', { gloss: .2, emissive: '#0a2105' })
+    this.treeTrunkMaterial = this.createMaterial('Tree trunks', '#824c2e', { gloss: .15 })
+    this.treeCanopyMaterial = this.createMaterial('Tree canopy', '#35a957', { gloss: .18 })
+    this.farHillMaterial = this.createMaterial('Distant wooded ridge', '#4fa76b', { gloss: .06 })
+    this.waterMaterial = this.createMaterial('Trough water', '#24b9da', {
       gloss: .9,
       metalness: .08,
-      emissive: '#082a32',
+      emissive: '#043644',
       opacity: .88,
     })
 
@@ -446,7 +463,7 @@ export class PlayCanvasFarm {
       scale: [.48 * size, 2.3 * size, .48 * size],
     })
     const canopyMaterial = blossom
-      ? this.createMaterial(`${name}-blossom`, '#d98d86', { gloss: .16, emissive: '#170605' })
+      ? this.createMaterial(`${name}-blossom`, '#ff8ab4', { gloss: .2, emissive: '#260412' })
       : this.treeCanopyMaterial
     for (let lobe = 0; lobe < 3; lobe += 1) {
       this.addPrimitive(root, `${name}-canopy-${lobe}`, 'sphere', canopyMaterial, {
@@ -581,6 +598,133 @@ export class PlayCanvasFarm {
     return roof
   }
 
+  drawLibraryFacade() {
+    return makeCanvas(1024, 512, (context, width, height) => {
+      const gradient = context.createLinearGradient(0, 0, 0, height)
+      gradient.addColorStop(0, '#fff3bd')
+      gradient.addColorStop(1, '#e9a45d')
+      context.fillStyle = gradient
+      context.fillRect(0, 0, width, height)
+
+      context.fillStyle = '#d57a55'
+      for (let row = 0; row < 12; row += 1) {
+        for (let column = 0; column < 22; column += 1) {
+          const offset = row % 2 ? 22 : 0
+          context.fillRect(column * 48 + offset, row * 42, 42, 8)
+        }
+      }
+
+      const drawWindow = (x, y, windowWidth, windowHeight) => {
+        context.fillStyle = '#174f6c'
+        context.beginPath()
+        context.roundRect(x, y, windowWidth, windowHeight, 34)
+        context.fill()
+        context.fillStyle = '#97e4dc'
+        context.fillRect(x + 18, y + 28, windowWidth - 36, windowHeight - 46)
+        context.fillStyle = '#643c36'
+        for (let shelf = 0; shelf < 3; shelf += 1) {
+          context.fillRect(x + 24, y + 60 + shelf * 52, windowWidth - 48, 8)
+          for (let book = 0; book < 8; book += 1) {
+            const colors = ['#e95c56', '#f2bd42', '#3e8fc2', '#7a66cf', '#52a869']
+            context.fillStyle = colors[(shelf * 3 + book) % colors.length]
+            context.fillRect(x + 28 + book * ((windowWidth - 60) / 8), y + 34 + shelf * 52, 13, 25 + book % 3 * 6)
+          }
+        }
+        context.strokeStyle = '#fff8db'
+        context.lineWidth = 12
+        context.strokeRect(x + 10, y + 10, windowWidth - 20, windowHeight - 20)
+      }
+
+      drawWindow(70, 176, 230, 258)
+      drawWindow(724, 176, 230, 258)
+      context.fillStyle = '#235778'
+      context.beginPath()
+      context.roundRect(402, 174, 220, 310, 28)
+      context.fill()
+      context.fillStyle = '#f6cd54'
+      context.fillRect(510, 174, 8, 310)
+      context.fillRect(402, 318, 220, 9)
+
+      context.fillStyle = '#315d83'
+      context.beginPath()
+      context.moveTo(310, 118)
+      context.lineTo(512, 32)
+      context.lineTo(714, 118)
+      context.closePath()
+      context.fill()
+      context.fillStyle = '#fff6cf'
+      context.beginPath()
+      context.arc(512, 102, 43, 0, Math.PI * 2)
+      context.fill()
+      context.fillStyle = '#315d83'
+      context.beginPath()
+      context.moveTo(512, 68)
+      context.lineTo(512, 134)
+      context.moveTo(479, 102)
+      context.lineTo(545, 102)
+      context.lineWidth = 9
+      context.strokeStyle = '#315d83'
+      context.stroke()
+
+      context.fillStyle = '#1c4764'
+      context.fillRect(318, 126, 388, 38)
+      context.fillStyle = '#fff4c6'
+      context.font = '900 34px Arial'
+      context.textAlign = 'center'
+      context.textBaseline = 'middle'
+      context.fillText('CLOUD LIBRARY', width / 2, 146)
+    })
+  }
+
+  createLibraryLoft(x, z) {
+    const body = this.createPhysicalBox(
+      'Microsoft Cloud Library',
+      [x, 2.4, z],
+      [11.5, 4.8, 6.2],
+      this.creamMaterial,
+      { friction: .9 },
+    )
+    const facadeTexture = this.textureFromSource(this.drawLibraryFacade(), false)
+    facadeTexture.anisotropy = 12
+    const facadeMaterial = this.createTextureMaterial('Illustrated Cloud Library facade', facadeTexture, {
+      emissive: .06,
+    })
+    this.addPrimitive(body, 'Cloud Library illustrated facade', 'plane', facadeMaterial, {
+      position: [0, 0, 3.115],
+      scale: [11.15, 1, 4.55],
+      rotation: [90, 0, 0],
+      castShadows: false,
+    })
+    for (const side of [-1, 1]) {
+      this.addPrimitive(body, `Cloud Library roof-${side}`, 'box', this.roofMaterial, {
+        position: [side * 2.65, 3.55, 0],
+        scale: [6.5, .28, 6.8],
+        rotation: [0, 0, side * 29],
+      })
+    }
+    const loft = this.createPhysicalBox(
+      'Microsoft owl reading loft',
+      [x + 2.1, 4.55, z + 3.75],
+      [4.8, .3, 2.1],
+      this.woodLightMaterial,
+      { friction: .95 },
+    )
+    for (const side of [-1, 1]) {
+      this.addPrimitive(loft, `reading-loft-rail-${side}`, 'box', this.woodDarkMaterial, {
+        position: [side * 2.18, .6, 0],
+        scale: [.16, 1.15, 2.1],
+      })
+    }
+    for (let shelf = 0; shelf < 3; shelf += 1) {
+      this.addPrimitive(loft, `reading-loft-book-stack-${shelf}`, 'box', shelf % 2 ? this.redBarnMaterial : this.solarMaterial, {
+        position: [-1.35 + shelf * .55, .34 + shelf * .07, .28],
+        scale: [.42, .16, .72],
+        rotation: [0, shelf * 8 - 8, 0],
+      })
+    }
+    return { body, loft, perchHeight: 6.15 }
+  }
+
   createFarmBuildings() {
     const barn = this.createPitchedBuilding('Ticker Tails three-dimensional barn', -1, -23, 12, 6.2, 7.4, this.redBarnMaterial)
     this.addPrimitive(barn, 'Ticker Tails barn hay loft door', 'box', this.woodLightMaterial, {
@@ -607,6 +751,7 @@ export class PlayCanvasFarm {
     this.createOpenShed('Tesla solar charging barn', -19, -14, 10, 6.2, this.roofMaterial, true)
     this.createOpenShed('Pippa orchard shelter', -34, 6.6, 7.2, 4.5, this.redBarnMaterial)
     this.createPitchedBuilding('Anchor elephant stable', 31, 16.5, 11, 4.7, 6.5, this.creamMaterial)
+    this.microsoftLibrary = this.createLibraryLoft(25, -18.2)
 
     this.createPitchedBuilding('Alex physical farmhouse', -15, 28, 10.5, 4.8, 7.2, this.creamMaterial, this.roofMaterial, {
       chimney: true,
@@ -691,21 +836,149 @@ export class PlayCanvasFarm {
     }
   }
 
+  drawHabitatTexture(resident) {
+    const themes = {
+      pig: ['#87c84f', '#f6c956', '#e45d51'],
+      cat: ['#48a9a6', '#f8ca55', '#2d5798'],
+      owl: ['#6aa8be', '#f0d89b', '#3f5f9d'],
+      dragon: ['#4ca76c', '#6fe098', '#244d65'],
+      tortoise: ['#91b85d', '#d7c777', '#607c4d'],
+      elephant: ['#67b6c1', '#d8d49b', '#4a86a1'],
+      dog: ['#79c978', '#f4d45f', '#4488c7'],
+      horse: ['#c7a563', '#efd091', '#aa643c'],
+      peacock: ['#50b99d', '#6b79df', '#f1cd49'],
+      beaver: ['#6ab3aa', '#b97545', '#5e8e62'],
+      fox: ['#8ac564', '#e96b3f', '#75466e'],
+      ox: ['#b88b5e', '#e0c17c', '#8c4f43'],
+      flamingo: ['#68bed1', '#f1789d', '#f5d26a'],
+      hawk: ['#9abf70', '#d6a65d', '#5e6880'],
+      crop: ['#73c65a', '#d6e452', '#ffffff'],
+    }
+    const [base, light, accent] = themes[resident.kind] || themes.crop
+    return makeCanvas(512, 512, (context, width, height) => {
+      context.fillStyle = base
+      context.fillRect(0, 0, width, height)
+      let seed = [...resident.id].reduce((sum, letter) => sum + letter.charCodeAt(0), 7331)
+      const random = () => {
+        seed = (seed * 1664525 + 1013904223) % 4294967296
+        return seed / 4294967296
+      }
+      for (let index = 0; index < 220; index += 1) {
+        const x = random() * width
+        const y = random() * height
+        const radius = 2 + random() * 12
+        context.fillStyle = index % 3
+          ? `${light}${index % 4 ? '36' : '55'}`
+          : `${accent}30`
+        context.beginPath()
+        context.ellipse(x, y, radius * 1.8, radius, random() * Math.PI, 0, Math.PI * 2)
+        context.fill()
+      }
+
+      const motif = (x, y, size, angle) => {
+        context.save()
+        context.translate(x, y)
+        context.rotate(angle)
+        context.lineCap = 'round'
+        context.lineJoin = 'round'
+        if (resident.kind === 'owl') {
+          context.fillStyle = '#fff0bd'
+          context.fillRect(-size * .48, -size * .34, size * .96, size * .68)
+          context.strokeStyle = '#3f5f9d'
+          context.lineWidth = size * .1
+          context.beginPath()
+          context.moveTo(0, -size * .32)
+          context.lineTo(0, size * .32)
+          context.stroke()
+          context.fillStyle = '#ffffff7c'
+          context.beginPath()
+          context.arc(size * .46, -size * .42, size * .2, 0, Math.PI * 2)
+          context.fill()
+        } else if (resident.kind === 'dragon' || resident.kind === 'fox') {
+          context.strokeStyle = accent
+          context.lineWidth = size * .12
+          context.strokeRect(-size * .42, -size * .3, size * .84, size * .6)
+          context.fillStyle = light
+          for (const pin of [-.25, 0, .25]) context.fillRect(pin * size - size * .035, -size * .44, size * .07, size * .18)
+        } else if (resident.kind === 'pig') {
+          context.fillStyle = '#e45d51'
+          context.beginPath()
+          context.arc(0, 0, size * .34, 0, Math.PI * 2)
+          context.fill()
+          context.fillStyle = '#6d9c3d'
+          context.fillRect(-size * .035, -size * .5, size * .07, size * .22)
+        } else if (resident.kind === 'cat') {
+          context.strokeStyle = '#2d5798'
+          context.lineWidth = size * .11
+          context.beginPath()
+          context.arc(0, 0, size * .38, .15, Math.PI * 1.75)
+          context.stroke()
+          context.fillStyle = '#f8ca55'
+          context.beginPath()
+          context.arc(size * .35, -size * .18, size * .13, 0, Math.PI * 2)
+          context.fill()
+        } else if (resident.kind === 'elephant' || resident.kind === 'flamingo' || resident.kind === 'beaver') {
+          context.strokeStyle = accent
+          context.lineWidth = size * .08
+          for (let wave = -1; wave <= 1; wave += 1) {
+            context.beginPath()
+            context.arc(wave * size * .35, 0, size * .32, 0, Math.PI)
+            context.stroke()
+          }
+        } else if (resident.kind === 'horse') {
+          context.fillStyle = accent
+          context.fillRect(-size * .42, -size * .29, size * .84, size * .58)
+          context.fillStyle = '#fff2c4'
+          context.fillRect(-size * .25, -size * .16, size * .5, size * .32)
+        } else if (resident.kind === 'peacock' || resident.kind === 'hawk') {
+          context.fillStyle = accent
+          context.beginPath()
+          context.ellipse(0, 0, size * .27, size * .5, 0, 0, Math.PI * 2)
+          context.fill()
+          context.fillStyle = light
+          context.beginPath()
+          context.arc(0, -size * .1, size * .13, 0, Math.PI * 2)
+          context.fill()
+        } else {
+          context.strokeStyle = accent
+          context.lineWidth = size * .09
+          context.beginPath()
+          context.arc(0, 0, size * .35, 0, Math.PI * 2)
+          context.stroke()
+          context.beginPath()
+          context.moveTo(-size * .35, 0)
+          context.lineTo(size * .35, 0)
+          context.moveTo(0, -size * .35)
+          context.lineTo(0, size * .35)
+          context.stroke()
+        }
+        context.restore()
+      }
+      for (let index = 0; index < 18; index += 1) {
+        motif(random() * width, random() * height, 14 + random() * 18, random() * Math.PI * 2)
+      }
+    })
+  }
+
   createHabitatSurface(resident) {
     const { pen } = resident
     const width = mapWidth(pen.width)
     const depth = mapDepth(pen.height)
     const centerX = residentX(resident, pen.x + pen.width / 2)
     const centerZ = residentZ(resident, pen.y + pen.height / 2)
-    const habitatMaterial = this.createMaterial(`${resident.id}-habitat`, resident.accent, {
-      gloss: .08,
-      opacity: resident.kind === 'crop' ? .2 : .12,
+    const texture = this.textureFromSource(this.drawHabitatTexture(resident), false)
+    texture.addressU = pc.ADDRESS_REPEAT
+    texture.addressV = pc.ADDRESS_REPEAT
+    texture.anisotropy = 8
+    const habitatMaterial = this.createTextureMaterial(`${resident.id}-illustrated-habitat`, texture, {
+      emissive: .018,
     })
-    habitatMaterial.depthWrite = false
+    habitatMaterial.diffuseMapTiling.set(Math.max(1, width / 8), Math.max(1, depth / 8))
+    habitatMaterial.emissiveMapTiling.set(Math.max(1, width / 8), Math.max(1, depth / 8))
     habitatMaterial.update()
     this.addPrimitive(this.app.root, `${resident.home}-physical-surface`, 'plane', habitatMaterial, {
-      position: [centerX, .035, centerZ],
-      scale: [width * .94, 1, depth * .9],
+      position: [centerX, .045, centerZ],
+      scale: [width * .985, 1, depth * .985],
       castShadows: false,
       receiveShadows: true,
     })
@@ -812,7 +1085,16 @@ export class PlayCanvasFarm {
       castShadows: false,
     })
     halo.render.meshInstances.forEach(instance => { instance.castShadow = false })
-    const station = { x, z, halo, props: [], phase: Math.random() * Math.PI * 2 }
+    const station = {
+      x,
+      z,
+      halo,
+      props: [],
+      phase: Math.random() * Math.PI * 2,
+      perchHeight: resident.kind === 'owl' && resident.id === 'microsoft'
+        ? this.microsoftLibrary?.perchHeight || 6.15
+        : null,
+    }
 
     if (resident.kind === 'dragon') {
       for (let index = 0; index < 7; index += 1) {
@@ -847,13 +1129,14 @@ export class PlayCanvasFarm {
       })
       station.props.push(chargeOrb)
     } else if (resident.kind === 'owl') {
-      const perch = this.createPhysicalBox(`${resident.id}-perch`, [x, 1.25, z], [.22, 2.5, .22], this.woodMaterial)
+      const perchBase = station.perchHeight ? station.perchHeight - .24 : 1.25
+      const perch = this.createPhysicalBox(`${resident.id}-perch`, [x, perchBase, z], [1.8, .18, .24], this.woodMaterial)
       station.props.push(perch)
       this.addPrimitive(perch, `${resident.id}-perch-crossbar`, 'box', this.woodLightMaterial, {
-        position: [0, .86, 0],
-        scale: [1.8, .14, .14],
+        position: [0, .14, 0],
+        scale: [2.25, .12, .16],
       })
-      const orb = this.createPhysicalSphere(`${resident.id}-cloud-orb`, [x, 2.65, z], .25, accentMaterial, {
+      const orb = this.createPhysicalSphere(`${resident.id}-cloud-orb`, [x, perchBase + 1.05, z], .25, accentMaterial, {
         type: pc.BODYTYPE_STATIC,
       })
       station.props.push(orb)
@@ -1227,7 +1510,7 @@ export class PlayCanvasFarm {
 
   drawGrassTexture() {
     return makeCanvas(256, 256, (context, width, height) => {
-      context.fillStyle = '#70944f'
+      context.fillStyle = '#73bf43'
       context.fillRect(0, 0, width, height)
       let seed = 8421
       const random = () => {
@@ -1238,7 +1521,7 @@ export class PlayCanvasFarm {
         const x = random() * width
         const y = random() * height
         const length = 1 + random() * 4
-        context.strokeStyle = random() > .48 ? 'rgba(38,91,43,.3)' : 'rgba(214,218,117,.25)'
+        context.strokeStyle = random() > .48 ? 'rgba(20,115,48,.34)' : 'rgba(239,241,101,.32)'
         context.lineWidth = .5 + random()
         context.beginPath()
         context.moveTo(x, y)
@@ -1255,10 +1538,81 @@ export class PlayCanvasFarm {
     })
   }
 
+  habitatMeeting(a, b) {
+    if (a.farmId !== b.farmId || a.kind === 'crop' || b.kind === 'crop') return null
+    const tolerance = 2
+    const aRight = a.pen.x + a.pen.width
+    const bRight = b.pen.x + b.pen.width
+    const aFar = a.pen.y + a.pen.height
+    const bFar = b.pen.y + b.pen.height
+    const overlapYStart = Math.max(a.pen.y, b.pen.y)
+    const overlapYEnd = Math.min(aFar, bFar)
+    const overlapXStart = Math.max(a.pen.x, b.pen.x)
+    const overlapXEnd = Math.min(aRight, bRight)
+    const inset = 24
+
+    if (Math.abs(aRight - b.pen.x) <= tolerance && overlapYEnd - overlapYStart > 60) {
+      const y = (overlapYStart + overlapYEnd) / 2
+      return {
+        a: new pc.Vec3(residentX(a, aRight - inset), 0, residentZ(a, y)),
+        b: new pc.Vec3(residentX(b, b.pen.x + inset), 0, residentZ(b, y)),
+      }
+    }
+    if (Math.abs(bRight - a.pen.x) <= tolerance && overlapYEnd - overlapYStart > 60) {
+      const y = (overlapYStart + overlapYEnd) / 2
+      return {
+        a: new pc.Vec3(residentX(a, a.pen.x + inset), 0, residentZ(a, y)),
+        b: new pc.Vec3(residentX(b, bRight - inset), 0, residentZ(b, y)),
+      }
+    }
+    if (Math.abs(aFar - b.pen.y) <= tolerance && overlapXEnd - overlapXStart > 60) {
+      const x = (overlapXStart + overlapXEnd) / 2
+      return {
+        a: new pc.Vec3(residentX(a, x), 0, residentZ(a, aFar - inset)),
+        b: new pc.Vec3(residentX(b, x), 0, residentZ(b, b.pen.y + inset)),
+      }
+    }
+    if (Math.abs(bFar - a.pen.y) <= tolerance && overlapXEnd - overlapXStart > 60) {
+      const x = (overlapXStart + overlapXEnd) / 2
+      return {
+        a: new pc.Vec3(residentX(a, x), 0, residentZ(a, a.pen.y + inset)),
+        b: new pc.Vec3(residentX(b, x), 0, residentZ(b, bFar - inset)),
+      }
+    }
+    return null
+  }
+
+  createNeighborNetwork() {
+    const animals = farmResidents.filter(resident => resident.kind !== 'crop')
+    animals.forEach(resident => {
+      const actor = this.actors.get(resident.id)
+      if (actor) actor.neighborMeetings = new Map()
+    })
+    animals.forEach((resident, index) => {
+      for (const neighbor of animals.slice(index + 1)) {
+        const meeting = this.habitatMeeting(resident, neighbor)
+        if (!meeting) continue
+        const actor = this.actors.get(resident.id)
+        const other = this.actors.get(neighbor.id)
+        if (!actor || !other) continue
+        actor.neighborIds.push(neighbor.id)
+        other.neighborIds.push(resident.id)
+        actor.neighborMeetings.set(neighbor.id, meeting.a)
+        other.neighborMeetings.set(resident.id, meeting.b)
+      }
+    })
+  }
+
   createAnimal(resident) {
     const rig = createAnimalRig(resident, this.createMaterial)
     const physicsRoot = new pc.Entity(`resident:${resident.id}`)
-    const start = new pc.Vec3(residentX(resident, resident.anchor.x), rig.bodyHeight * .58 + .15, residentZ(resident, resident.anchor.y))
+    const station = resident.playcanvasStation
+    const startsPerched = resident.kind === 'owl' && station?.perchHeight
+    const start = new pc.Vec3(
+      startsPerched ? station.x : residentX(resident, resident.anchor.x),
+      startsPerched ? station.perchHeight : rig.bodyHeight * .58 + .15,
+      startsPerched ? station.z : residentZ(resident, resident.anchor.y),
+    )
     physicsRoot.setPosition(start)
     physicsRoot.addComponent('collision', {
       type: 'capsule',
@@ -1300,8 +1654,14 @@ export class PlayCanvasFarm {
       phase: Math.random() * Math.PI * 2,
       motionSpeed: 0,
       yaw: 0,
+      celebrationProgress: 0,
       renderScale: 1,
       stationCooldown: 0,
+      neighborIds: [],
+      encounter: null,
+      airborne: false,
+      perched: Boolean(startsPerched),
+      flightHeight: resident.kind === 'owl' ? 7.35 : resident.kind === 'hawk' ? 5.5 : null,
     }
     this.actors.set(resident.id, actor)
     this.updateInvestment(resident.id)
@@ -1313,14 +1673,14 @@ export class PlayCanvasFarm {
     const root = new pc.Entity(`${resident.id}-${cropType}-crop-3D`)
     root.setPosition(residentX(resident, resident.anchor.x), .03, residentZ(resident, resident.anchor.y))
     this.app.root.addChild(root)
-    const stemMaterial = this.createMaterial(`${resident.id} crop stems`, cropType === 'corn' ? '#65813d' : '#39794a', { gloss: .2 })
-    const leafMaterial = this.createMaterial(`${resident.id} crop leaves`, cropType === 'cotton' ? '#5b8b55' : '#79c65f', {
+    const stemMaterial = this.createMaterial(`${resident.id} crop stems`, cropType === 'corn' ? '#5ba63b' : '#25a55c', { gloss: .22 })
+    const leafMaterial = this.createMaterial(`${resident.id} crop leaves`, cropType === 'cotton' ? '#50bd69' : '#7ddd4f', {
       gloss: .27,
-      emissive: '#061806',
+      emissive: '#082408',
     })
     const produceMaterial = this.createMaterial(
       `${resident.id} crop produce`,
-      cropType === 'cotton' ? '#f5f1dc' : cropType === 'corn' ? '#e3b944' : '#79c65f',
+      cropType === 'cotton' ? '#fff8ee' : cropType === 'corn' ? '#ffd447' : '#83e957',
       { gloss: cropType === 'cotton' ? .5 : .25 },
     )
     const plants = []
@@ -1366,21 +1726,163 @@ export class PlayCanvasFarm {
       }
       plants.push({ entity: plant, phase: index * .47 })
     }
+    const mascot = this.createCropMascot(cropType, root, {
+      stem: stemMaterial,
+      leaf: leafMaterial,
+      produce: produceMaterial,
+    })
     const labelBaseY = cropType === 'corn' ? 2.35 : cropType === 'cotton' ? 1.9 : 1.6
     const label = this.createCreatureNameplate(resident, root, labelBaseY, { width: 6.4, height: 1.55 })
     const actor = {
       resident,
       root,
       plants,
+      mascot,
       label,
       labelBaseY,
       state: 'crop',
       scale: 1,
       pulse: 0,
+      celebration: 0,
       phase: Math.random() * Math.PI * 2,
     }
     this.actors.set(resident.id, actor)
     this.updateInvestment(resident.id)
+  }
+
+  createCropMascot(cropType, root, materials) {
+    const mascot = new pc.Entity(`${cropType}-crop-character`)
+    const baseY = cropType === 'corn' ? 1.05 : cropType === 'cotton' ? .76 : .7
+    mascot.setLocalPosition(2.65, baseY, 2.25)
+    mascot.setLocalEulerAngles(0, -135, 0)
+    root.addChild(mascot)
+
+    const faceMaterial = cropType === 'clover'
+      ? this.createMaterial('clover mascot face', '#b8f06b', { gloss: .36, emissive: '#102905' })
+      : materials.produce
+    let face
+    if (cropType === 'corn') {
+      face = this.addPrimitive(mascot, 'corn-character-cob', 'capsule', materials.produce, {
+        position: [0, 0, 0],
+        scale: [.34, .82, .34],
+      })
+      for (const side of [-1, 1]) {
+        this.addPrimitive(mascot, `corn-husk-${side}`, 'sphere', materials.leaf, {
+          position: [side * .32, -.18, .12],
+          scale: [.2, .72, .13],
+          rotation: [0, 0, side * 24],
+        })
+        this.addPrimitive(mascot, `corn-arm-${side}`, 'capsule', materials.leaf, {
+          position: [side * .48, .04, -.02],
+          scale: [.07, .34, .07],
+          rotation: [0, 0, side * 62],
+        })
+      }
+      for (let row = -2; row <= 2; row += 1) {
+        for (const column of [-1, 0, 1]) {
+          this.addPrimitive(face, `corn-kernel-${row}-${column}`, 'sphere', materials.produce, {
+            position: [column * .31, row * .19, -.72],
+            scale: [.16, .12, .06],
+            castShadows: false,
+          })
+        }
+      }
+    } else if (cropType === 'cotton') {
+      const stalk = this.addPrimitive(mascot, 'cotton-character-stalk', 'capsule', materials.stem, {
+        position: [0, -.25, .12],
+        scale: [.1, .55, .1],
+      })
+      face = this.addPrimitive(mascot, 'cotton-character-puff', 'sphere', materials.produce, {
+        position: [0, .32, 0],
+        scale: [.5, .47, .48],
+      })
+      for (const [index, position] of [[-.35, .28, .05], [.34, .27, .06], [0, .6, .08]].entries()) {
+        this.addPrimitive(mascot, `cotton-puff-${index}`, 'sphere', materials.produce, {
+          position,
+          scale: [.34, .32, .32],
+        })
+      }
+      for (const side of [-1, 1]) {
+        this.addPrimitive(stalk, `cotton-leaf-arm-${side}`, 'sphere', materials.leaf, {
+          position: [side * 2.5, .1, 0],
+          scale: [1.8, .15, .65],
+          rotation: [0, 0, side * 24],
+        })
+      }
+    } else {
+      face = this.addPrimitive(mascot, 'clover-character-center', 'sphere', materials.produce, {
+        position: [0, .08, 0],
+        scale: [.52, .48, .46],
+      })
+      for (let index = 0; index < 4; index += 1) {
+        const angle = index * Math.PI / 2 + Math.PI / 4
+        this.addPrimitive(mascot, `clover-heart-leaf-${index}`, 'sphere', materials.leaf, {
+          position: [Math.cos(angle) * .47, .16 + Math.sin(angle) * .39, .1],
+          scale: [.42, .35, .16],
+          rotation: [0, 0, 45 - index * 90],
+        })
+      }
+      this.addPrimitive(mascot, 'clover-character-stem', 'capsule', materials.stem, {
+        position: [0, -.36, .1],
+        scale: [.07, .48, .07],
+      })
+      face.render.meshInstances.forEach(instance => { instance.material = faceMaterial })
+      for (const side of [-1, 1]) {
+        this.addPrimitive(mascot, `clover-arm-${side}`, 'capsule', materials.stem, {
+          position: [side * .55, -.02, .03],
+          scale: [.06, .35, .06],
+          rotation: [0, 0, side * 62],
+        })
+        this.addPrimitive(mascot, `clover-foot-${side}`, 'sphere', materials.leaf, {
+          position: [side * .2, -.78, -.08],
+          scale: [.2, .09, .3],
+        })
+      }
+    }
+
+    const eyeMaterial = this.createMaterial(`${cropType} character eyes`, '#14251c', { gloss: .78 })
+    const eyeWhiteMaterial = this.createMaterial(`${cropType} character eye whites`, '#fffdf0', { gloss: .62 })
+    const blushMaterial = this.createMaterial(`${cropType} character cheeks`, '#ff7f9f', { gloss: .3 })
+    const eyes = []
+    for (const [index, side] of [-1, 1].entries()) {
+      const eyeScale = [.24, .3, .105]
+      const white = this.addPrimitive(face, `crop-eye-white-${index}`, 'sphere', eyeWhiteMaterial, {
+        position: [side * .25, .15, -.78],
+        scale: eyeScale,
+        castShadows: false,
+      })
+      this.addPrimitive(white, `crop-eye-pupil-${index}`, 'sphere', eyeMaterial, {
+        position: [0, -.04, -.7],
+        scale: [.48, .58, .32],
+        castShadows: false,
+      })
+      this.addPrimitive(white, `crop-eye-glint-${index}`, 'sphere', eyeWhiteMaterial, {
+        position: [-.13, .18, -.84],
+        scale: [.12, .12, .08],
+        castShadows: false,
+      })
+      this.addPrimitive(face, `crop-cheek-${index}`, 'sphere', blushMaterial, {
+        position: [side * .37, -.07, -.79],
+        scale: [.12, .07, .035],
+        castShadows: false,
+      })
+      eyes.push({ entity: white, scale: eyeScale })
+    }
+    for (const [index, side] of [-1, 1].entries()) {
+      this.addPrimitive(face, `crop-smile-${index}`, 'capsule', eyeMaterial, {
+        position: [side * .055, -.15, -.8],
+        scale: [.024, .1, .024],
+        rotation: [0, 0, side * 38],
+        castShadows: false,
+      })
+    }
+
+    return {
+      root: mascot,
+      eyes,
+      baseY,
+      characterScale: cropType === 'corn' ? 1.55 : cropType === 'cotton' ? 1.85 : 2.15,
+    }
   }
 
   createWeatherSystem() {
@@ -1546,8 +2048,84 @@ export class PlayCanvasFarm {
     if (match) this.options.onResidentSelect?.(match)
   }
 
+  startNeighborEncounter(actor) {
+    if (!actor.neighborIds?.length || actor.encounter || actor.manual) return false
+    const candidates = actor.neighborIds
+      .map(id => this.actors.get(id))
+      .filter(other => (
+        other
+        && !other.encounter
+        && !other.manual
+        && ['idle', 'moving'].includes(other.state)
+        && this.options.getPosition(other.resident.id) > 0
+      ))
+    if (!candidates.length) return false
+    const other = candidates[Math.floor(Math.random() * candidates.length)]
+    const actorTarget = actor.neighborMeetings.get(other.resident.id)
+    const otherTarget = other.neighborMeetings.get(actor.resident.id)
+    if (!actorTarget || !otherTarget) return false
+
+    const encounter = {
+      id: `${actor.resident.id}-${other.resident.id}-${Math.floor(this.elapsed * 10)}`,
+      type: Math.random() < .68 ? 'neighbor-friendly' : 'neighbor-challenge',
+      actors: [actor, other],
+    }
+    for (const [participant, target] of [[actor, actorTarget], [other, otherTarget]]) {
+      participant.encounter = encounter
+      participant.target = target.clone()
+      participant.afterArrival = 'neighbor'
+      participant.state = 'moving'
+      participant.manual = null
+      participant.perched = false
+      participant.airborne = ['owl', 'hawk'].includes(participant.resident.kind)
+      participant.physicsRoot.rigidbody?.activate()
+    }
+    return true
+  }
+
+  beginNeighborGesture(actor) {
+    const encounter = actor.encounter
+    if (!encounter) {
+      actor.state = 'idle'
+      actor.nextDecision = 1
+      return
+    }
+    actor.state = 'performing'
+    actor.target = null
+    actor.afterArrival = null
+    actor.manual = {
+      type: encounter.type,
+      elapsed: 0,
+      duration: encounter.type === 'neighbor-friendly' ? 2.4 : 2.05,
+      impulseApplied: false,
+      encounter,
+    }
+    this.emitMotifs(actor.physicsRoot.getPosition(), encounter.type)
+  }
+
   chooseTarget(actor) {
     const { pen, station } = actor.resident
+    if (Math.random() < .31 && this.startNeighborEncounter(actor)) return
+
+    if (actor.resident.kind === 'owl') {
+      if (actor.perched || Math.random() < .62) {
+        const marginPixels = 44
+        const px = pen.x + marginPixels + Math.random() * Math.max(1, pen.width - marginPixels * 2)
+        const py = pen.y + marginPixels + Math.random() * Math.max(1, pen.height - marginPixels * 2)
+        actor.target = new pc.Vec3(residentX(actor.resident, px), 0, residentZ(actor.resident, py))
+        actor.afterArrival = 'return-to-loft'
+        actor.state = 'moving'
+        actor.airborne = true
+        actor.perched = false
+        return
+      }
+      actor.target = new pc.Vec3(station.x, 0, station.z)
+      actor.afterArrival = 'perch'
+      actor.state = 'moving'
+      actor.airborne = true
+      return
+    }
+
     const marginPixels = actor.resident.kind === 'elephant' ? 44 : 30
     const useStation = Math.random() < .34
     const px = useStation
@@ -1562,6 +2140,31 @@ export class PlayCanvasFarm {
   }
 
   arrive(actor) {
+    if (actor.afterArrival === 'neighbor') {
+      this.beginNeighborGesture(actor)
+      return
+    }
+    if (actor.afterArrival === 'return-to-loft') {
+      actor.target = new pc.Vec3(
+        actor.resident.playcanvasStation.x,
+        0,
+        actor.resident.playcanvasStation.z,
+      )
+      actor.afterArrival = 'perch'
+      actor.state = 'moving'
+      actor.airborne = true
+      actor.nextDecision = 0
+      return
+    }
+    if (actor.afterArrival === 'perch') {
+      actor.state = 'idle'
+      actor.target = null
+      actor.afterArrival = null
+      actor.airborne = false
+      actor.perched = true
+      actor.nextDecision = 2.8 + Math.random() * 3.8
+      return
+    }
     actor.state = 'idle'
     actor.target = null
     actor.nextDecision = .8 + Math.random() * 1.8
@@ -1609,6 +2212,35 @@ export class PlayCanvasFarm {
     actor.physicsRoot.rigidbody?.activate()
   }
 
+  celebrateResident(id, mode = 'feed') {
+    const actor = this.actors.get(id)
+    if (!actor) return
+    const source = actor.state === 'crop' ? actor.root : actor.physicsRoot
+    this.emitCelebration(source.getPosition())
+    if (actor.state === 'crop') {
+      actor.pulse = 1.45
+      actor.celebration = 1.35
+      return
+    }
+
+    actor.target = null
+    actor.afterArrival = null
+    actor.state = 'performing'
+    actor.manual = {
+      type: 'celebrate',
+      elapsed: 0,
+      duration: 1.35,
+      impulseApplied: false,
+      nextTarget: new pc.Vec3(
+        actor.resident.playcanvasStation.x,
+        0,
+        actor.resident.playcanvasStation.z,
+      ),
+      nextMode: mode,
+    }
+    actor.physicsRoot.rigidbody?.activate()
+  }
+
   performTrick(id, trick) {
     const actor = this.actors.get(id)
     if (!actor || actor.state === 'crop') return
@@ -1622,10 +2254,22 @@ export class PlayCanvasFarm {
   }
 
   emitMotifs(position, mode) {
+    const diffuse = mode === 'sell' || mode === 'neighbor-challenge'
+      ? '#ff6a55'
+      : mode === 'neighbor-friendly'
+        ? '#65e3c4'
+        : mode === 'jump' || mode === 'spin'
+          ? '#a779e6'
+          : '#f2cf58'
+    const emissive = mode === 'sell' || mode === 'neighbor-challenge'
+      ? '#42150c'
+      : mode === 'neighbor-friendly'
+        ? '#0b4039'
+        : '#403107'
     const motifMaterial = this.createMaterial(
       `motif-${mode}-${this.elapsed}`,
-      mode === 'sell' ? '#db674d' : mode === 'jump' || mode === 'spin' ? '#a779e6' : '#f2cf58',
-      { gloss: .72, emissive: mode === 'sell' ? '#42150c' : '#403107' },
+      diffuse,
+      { gloss: .72, emissive },
     )
     for (let index = 0; index < 8; index += 1) {
       const entity = this.addPrimitive(this.app.root, `motif-${mode}-${index}`, index % 2 ? 'sphere' : 'cone', motifMaterial, {
@@ -1644,6 +2288,63 @@ export class PlayCanvasFarm {
     }
   }
 
+  emitCelebration(position) {
+    this.celebrationMaterials ||= [
+      ['sun-gold', '#ffd83d', '#5a3600'],
+      ['party-coral', '#ff596f', '#4b0611'],
+      ['sky-crystal', '#36dff2', '#053d49'],
+      ['lime-spark', '#9bea45', '#254500'],
+      ['violet-gem', '#a970ff', '#281058'],
+      ['pink-star', '#ff79cf', '#520b3f'],
+    ].map(([name, diffuse, emissive]) => this.createMaterial(
+      `celebration-${name}`,
+      diffuse,
+      { gloss: .88, metalness: .18, emissive },
+    ))
+
+    const origin = position.clone()
+    origin.y += 1.05
+    for (let index = 0; index < 32; index += 1) {
+      const angle = index / 32 * Math.PI * 2 + Math.random() * .3
+      const speed = 2.6 + Math.random() * 3.8
+      const isSpark = index % 3 === 0
+      const initialScale = isSpark
+        ? new pc.Vec3(.035, .22 + Math.random() * .12, .035)
+        : new pc.Vec3(.1 + Math.random() * .08, .13 + Math.random() * .12, .1 + Math.random() * .08)
+      const entity = this.addPrimitive(
+        this.app.root,
+        `celebration-${isSpark ? 'spark' : 'crystal'}-${index}`,
+        isSpark ? 'capsule' : index % 2 ? 'cone' : 'box',
+        this.celebrationMaterials[index % this.celebrationMaterials.length],
+        {
+          position: [origin.x, origin.y, origin.z],
+          scale: [initialScale.x, initialScale.y, initialScale.z],
+          rotation: [Math.random() * 180, Math.random() * 180, Math.random() * 180],
+          castShadows: false,
+        },
+      )
+      this.effects.push({
+        kind: 'celebration',
+        entity,
+        elapsed: -(index % 4) * .018,
+        duration: .85 + Math.random() * .58,
+        start: origin.clone(),
+        velocity: new pc.Vec3(
+          Math.cos(angle) * speed,
+          3.6 + Math.random() * 4.4,
+          Math.sin(angle) * speed,
+        ),
+        gravity: -8.4,
+        initialScale,
+        spin: new pc.Vec3(
+          180 + Math.random() * 320,
+          220 + Math.random() * 380,
+          150 + Math.random() * 300,
+        ),
+      })
+    }
+  }
+
   updateInvestment(id) {
     const actor = this.actors.get(id)
     if (!actor) return
@@ -1654,7 +2355,7 @@ export class PlayCanvasFarm {
       actor.root.enabled = value > 0
       return
     }
-    actor.renderScale = clamp(.78 + allocation / 34, .76, 1.34)
+    actor.renderScale = clamp(.92 + allocation / 32, .9, 1.48)
     actor.heading.setLocalScale(actor.renderScale, actor.renderScale, actor.renderScale)
     actor.label.enabled = value > 0
     actor.rig.root.enabled = value > 0
@@ -1686,9 +2387,9 @@ export class PlayCanvasFarm {
     const stress = this.weather.stress
     const warmth = this.weather.warmth / 100
     this.app.scene.ambientLight.set(
-      .17 + this.weather.brightness * .11,
-      .19 + this.weather.brightness * .12,
-      .17 + this.weather.brightness * .09,
+      .16 + this.weather.brightness * .1,
+      .21 + this.weather.brightness * .13,
+      .2 + this.weather.brightness * .12,
     )
     this.baseSunIntensity = clamp(.76 + this.weather.brightness * .62, .9, 1.42)
     this.baseExposure = clamp(.9 + this.weather.brightness * .11, .96, 1.02)
@@ -1700,9 +2401,9 @@ export class PlayCanvasFarm {
     this.keyLight.light.color.set(1, .84 + warmth * .08, .68 + warmth * .16)
     this.fillLight.light.intensity = .22 + (100 - stress) / 300
     this.camera.camera.clearColor.set(
-      .31 + this.weather.brightness * .28,
-      .48 + this.weather.brightness * .28,
-      .55 + this.weather.brightness * .3,
+      .22 + this.weather.brightness * .25,
+      .49 + this.weather.brightness * .28,
+      .68 + this.weather.brightness * .25,
     )
     this.rain?.forEach(drop => { drop.entity.enabled = this.weather.rain })
     this.cloudMaterial.opacity = clamp(.22 + stress / 145, .22, .78)
@@ -1738,17 +2439,44 @@ export class PlayCanvasFarm {
     if (actor.state === 'performing' && actor.manual) {
       actor.manual.elapsed += delta
       const progress = clamp(actor.manual.elapsed / actor.manual.duration, 0, 1)
+      actor.celebrationProgress = actor.manual.type === 'celebrate' ? progress : 0
       if (actor.manual.type === 'spin') {
         actor.rig.root.setLocalEulerAngles(0, progress * 720, 0)
       } else if (actor.manual.type === 'jump' && !actor.manual.impulseApplied) {
         root.rigidbody.applyImpulse(0, actor.rig.mass * 2.75, 0)
         actor.manual.impulseApplied = true
+      } else if (actor.manual.type === 'celebrate' && !actor.manual.impulseApplied) {
+        root.rigidbody.applyImpulse(0, actor.rig.mass * 1.25, 0)
+        actor.manual.impulseApplied = true
       }
       if (progress >= 1) {
-        actor.state = 'idle'
+        const completed = actor.manual
         actor.manual = null
-        actor.nextDecision = .85
+        actor.celebrationProgress = 0
         actor.rig.root.setLocalEulerAngles(0, 0, 0)
+        if (completed.encounter) {
+          actor.encounter = null
+          if (actor.resident.kind === 'owl') {
+            actor.target = new pc.Vec3(
+              actor.resident.playcanvasStation.x,
+              0,
+              actor.resident.playcanvasStation.z,
+            )
+            actor.afterArrival = 'perch'
+            actor.state = 'moving'
+            actor.airborne = true
+          } else {
+            actor.state = 'idle'
+            actor.nextDecision = 1.25 + Math.random() * 1.5
+          }
+        } else if (completed.nextTarget) {
+          actor.target = completed.nextTarget
+          actor.afterArrival = completed.nextMode
+          actor.state = 'moving'
+        } else {
+          actor.state = 'idle'
+          actor.nextDecision = .85
+        }
       }
     } else if (actor.state === 'moving' && actor.target) {
       const dx = actor.target.x - position.x
@@ -1757,12 +2485,17 @@ export class PlayCanvasFarm {
       if (distance < .62) {
         this.arrive(actor)
       } else {
-        const speed = (actor.resident.kind === 'tortoise' ? .85 : actor.resident.kind === 'elephant' ? 1.2 : 1.7) * this.weather.animalPace
+        const speed = (
+          actor.airborne
+            ? actor.resident.kind === 'owl' ? 2.75 : 3.1
+            : actor.resident.kind === 'tortoise' ? .85
+              : actor.resident.kind === 'elephant' ? 1.2
+                : 1.7
+        ) * this.weather.animalPace
         desiredX = dx / distance * speed
         desiredZ = dz / distance * speed
         actor.motionSpeed = speed
         actor.yaw = Math.atan2(-dx, -dz) * 180 / Math.PI
-        actor.heading.setLocalEulerAngles(0, actor.yaw, 0)
       }
     } else {
       actor.motionSpeed = lerp(actor.motionSpeed, 0, delta * 4)
@@ -1775,11 +2508,34 @@ export class PlayCanvasFarm {
     root.rigidbody.linearVelocity = new pc.Vec3(nextX, velocity.y, nextZ)
 
     if (actor.rig.hoverHeight) {
-      const hoverTarget = actor.rig.hoverHeight + Math.sin(this.elapsed * 1.8 + actor.phase) * .35
+      const perchHeight = actor.resident.playcanvasStation?.perchHeight
+      const baseHover = actor.resident.kind === 'owl'
+        ? actor.airborne ? actor.flightHeight : perchHeight || actor.rig.hoverHeight
+        : actor.rig.hoverHeight
+      const hoverTarget = baseHover + Math.sin(this.elapsed * (actor.airborne ? 2.6 : 1.8) + actor.phase) * (actor.airborne ? .45 : .12)
       const lift = (hoverTarget - position.y) * actor.rig.mass * 16 - velocity.y * actor.rig.mass * 5.2
       root.rigidbody.applyForce(0, lift, 0)
     }
 
+    const showcaseYaw = -135
+    if (actor.manual?.encounter) {
+      const other = actor.manual.encounter.actors.find(candidate => candidate !== actor)
+      if (other) {
+        const otherPosition = other.physicsRoot.getPosition()
+        actor.yaw = Math.atan2(
+          -(otherPosition.x - position.x),
+          -(otherPosition.z - position.z),
+        ) * 180 / Math.PI
+      }
+    }
+    const movementOffset = ((actor.yaw - showcaseYaw + 540) % 360) - 180
+    const socialGesture = actor.manual?.type === 'neighbor-friendly' || actor.manual?.type === 'neighbor-challenge'
+    const frontFacingYaw = socialGesture
+      ? actor.yaw
+      : showcaseYaw + (actor.state === 'moving'
+      ? clamp(movementOffset, -26, 26) * .28
+      : Math.sin(this.elapsed * .45 + actor.phase) * 1.8)
+    actor.heading.setLocalEulerAngles(0, frontFacingYaw, 0)
     animateAnimalRig(actor, this.elapsed, delta)
     actor.label.setLocalEulerAngles(90, 45, 0)
 
@@ -1792,6 +2548,7 @@ export class PlayCanvasFarm {
 
   updateCrop(actor, delta) {
     actor.pulse = Math.max(0, actor.pulse - delta)
+    actor.celebration = Math.max(0, actor.celebration - delta)
     actor.plants.forEach((plant, index) => {
       const pulse = actor.pulse > 0 ? 1 + Math.sin((1.2 - actor.pulse) * 13 + index) * .15 : 1
       const scale = actor.scale * pulse
@@ -1802,6 +2559,28 @@ export class PlayCanvasFarm {
         Math.cos(this.elapsed * 1.2 + plant.phase) * 4,
       )
     })
+    if (actor.mascot) {
+      const bob = Math.sin(this.elapsed * 2.4 + actor.phase)
+      const dancing = actor.celebration > 0
+      const dance = Math.sin(this.elapsed * 11.5)
+      const pulse = actor.pulse > 0 ? 1 + Math.sin((1.2 - actor.pulse) * 12) * .12 : 1
+      const scale = actor.scale * pulse * actor.mascot.characterScale
+      actor.mascot.root.setLocalPosition(
+        2.65,
+        actor.mascot.baseY + Math.abs(bob) * .05 + (dancing ? Math.abs(dance) * .18 : 0),
+        2.25,
+      )
+      actor.mascot.root.setLocalScale(scale * (1 + bob * .012), scale * (1 - bob * .015), scale)
+      actor.mascot.root.setLocalEulerAngles(
+        dancing ? dance * 8 : 0,
+        -135 + (dancing ? dance * 14 : 0),
+        dancing ? dance * 10 : bob * 2.2,
+      )
+      const blink = clamp((Math.sin(this.elapsed * .85 + actor.phase * 2.1) - .965) / .035, 0, 1)
+      actor.mascot.eyes.forEach(eye => {
+        eye.entity.setLocalScale(eye.scale[0], eye.scale[1] * (1 - blink * .8), eye.scale[2])
+      })
+    }
   }
 
   updateStations(delta) {
@@ -1859,6 +2638,26 @@ export class PlayCanvasFarm {
       if (progress >= 1) {
         effect.entity.destroy()
         return false
+      }
+      if (effect.kind === 'celebration') {
+        const time = effect.elapsed
+        effect.entity.setPosition(
+          effect.start.x + effect.velocity.x * time,
+          effect.start.y + effect.velocity.y * time + effect.gravity * time * time * .5,
+          effect.start.z + effect.velocity.z * time,
+        )
+        const envelope = Math.sin(progress * Math.PI)
+        effect.entity.setLocalScale(
+          effect.initialScale.x * (.45 + envelope),
+          effect.initialScale.y * (.45 + envelope),
+          effect.initialScale.z * (.45 + envelope),
+        )
+        effect.entity.rotate(
+          effect.spin.x * delta,
+          effect.spin.y * delta,
+          effect.spin.z * delta,
+        )
+        return true
       }
       const rise = easeOutCubic(progress)
       effect.entity.setPosition(

@@ -7,6 +7,7 @@ await mkdir('dist/vendor', { recursive: true })
 await Promise.all([
   cp('index.html', 'dist/index.html'),
   cp('src/app.js', 'dist/src/app.js'),
+  cp('src/audio.js', 'dist/src/audio.js'),
   cp('src/animal-rigs.js', 'dist/src/animal-rigs.js'),
   cp('src/playcanvas-farm.js', 'dist/src/playcanvas-farm.js'),
   cp('src/data.js', 'dist/src/data.js'),
